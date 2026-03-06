@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - BudgetBuddy</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #F9FAFB;
+            color: #111827;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR NAVIGATION */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-icon {
+            font-size: 36px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #10B981, #3B82F6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .user-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            opacity: 0.8;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: white;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            padding: 14px 16px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 32px;
+            max-width: calc(100vw - 280px);
+        }
+
+        .mobile-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu-btn {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: #6B7280;
+        }
+
+        /* TODAY'S TRANSACTIONS SECTION */
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            font-size: 24px;
+        }
+
+        .add-new-btn {
+            padding: 10px 20px;
+            background: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .add-new-btn:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .no-transactions {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .no-transactions-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .no-transactions h3 {
+            font-size: 20px;
+            color: #4B5563;
+            margin-bottom: 8px;
+        }
+
+        .no-transactions p {
+            font-size: 14px;
+            color: #9CA3AF;
+            margin-bottom: 24px;
+        }
+
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: #F9FAFB;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+            transition: all 0.2s;
+        }
+
+        .transaction-item:hover {
+            border-color: #3B82F6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+
+        .transaction-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .transaction-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .transaction-details h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .transaction-details p {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .transaction-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #EF4444;
+        }
+
+        /* STATISTICS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6B7280;
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            font-size: 28px;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            color: #10B981;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-change.negative {
+            color: #EF4444;
+        }
+
+        /* CHART SECTION */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        /* CATEGORIES BREAKDOWN */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: #F9FAFB;
+            border-radius: 12px;
+            border-left: 4px solid;
+        }
+
+        .category-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .category-icon {
+            font-size: 28px;
+        }
+
+        .category-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .category-progress {
+            width: 100%;
+            height: 6px;
+            background: #E5E7EB;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .category-progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .category-right {
+            text-align: right;
+        }
+
+        .category-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .category-percentage {
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        /* CATEGORY COLORS */
+        .food {
+            border-color: #FF6B6B;
+        }
+
+        .food .category-progress-bar {
+            background: #FF6B6B;
+        }
+
+        .transport {
+            border-color: #4ECDC4;
+        }
+
+        .transport .category-progress-bar {
+            background: #4ECDC4;
+        }
+
+        .shopping {
+            border-color: #A78BFA;
+        }
+
+        .shopping .category-progress-bar {
+            background: #A78BFA;
+        }
+
+        .utilities {
+            border-color: #FCD34D;
+        }
+
+        .utilities .category-progress-bar {
+            background: #FCD34D;
+        }
+
+        .healthcare {
+            border-color: #EF4444;
+        }
+
+        .healthcare .category-progress-bar {
+            background: #EF4444;
+        }
+
+        .entertainment {
+            border-color: #F472B6;
+        }
+
+        .entertainment .category-progress-bar {
+            background: #F472B6;
+        }
+
+        .education {
+            border-color: #10B981;
+        }
+
+        .education .category-progress-bar {
+            background: #10B981;
+        }
+
+        .rent {
+            border-color: #8B5CF6;
+        }
+
+        .rent .category-progress-bar {
+            background: #8B5CF6;
+        }
+
+        .other {
+            border-color: #6B7280;
+        }
+
+        .other .category-progress-bar {
+            background: #6B7280;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1024px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-visible {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+                max-width: 100vw;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 16px;
+            }
+        }
+
+        /* OVERLAY FOR MOBILE SIDEBAR */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">💰</div>
+                <div class="logo-text">BudgetBuddy</div>
+            </div>
+
+            <div class="user-profile">
+                <div class="user-avatar">U</div>
+                <div class="user-info">
+                    <h3>User</h3>
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-item active">
+                    <span class="nav-icon">🏠</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="add-expense.html" class="nav-item">
+                    <span class="nav-icon">➕</span>
+                    <span>Add Expense</span>
+                </a>
+                <a href="view-expenses.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>View Expenses</span>
+                </a>
+                <a href="budget-savings.html" class="nav-item">
+                    <span class="nav-icon">💰</span>
+                    <span>Budget & Savings</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span>Profile Info</span>
+                </a>
+            </div>
+
+            <button class="logout-btn" onclick="logout()">
+                <span class="nav-icon">🚪</span>
+                <span>Logout</span>
+            </button>
+        </nav>
+
+        <!-- OVERLAY -->
+        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- MOBILE HEADER -->
+            <div class="mobile-header">
+                <div class="mobile-menu-btn" onclick="toggleSidebar()">☰</div>
+                <div class="logo-text">💰 BudgetBuddy</div>
+                <div style="width: 32px;"></div>
+            </div>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+                <h1>Welcome Back! 👋</h1>
+                <p>Here's your financial overview for today</p>
+            </div>
+
+            <!-- STATISTICS CARDS -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Total Spent This Month</span>
+                        <span class="stat-icon">💸</span>
+                    </div>
+                    <div class="stat-value" id="totalSpent">₹8,500</div>
+                    <div class="stat-change">
+                        <span>↑</span>
+                        <span>12% from last month</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Budget Remaining</span>
+                        <span class="stat-icon">💰</span>
+                    </div>
+                    <div class="stat-value" id="budgetRemaining">₹6,500</div>
+                    <div class="stat-change">
+                        <span>↓</span>
+                        <span>57% of budget used</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Total Expenses</span>
+                        <span class="stat-icon">📊</span>
+                    </div>
+                    <div class="stat-value" id="totalExpenses">24</div>
+                    <div class="stat-change">
+                        <span>↑</span>
+                        <span>3 expenses today</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TODAY'S TRANSACTIONS SECTION -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="section-icon">📅</span>
+                        Today's Transactions
+                    </h2>
+                    <button class="add-new-btn" onclick="goToAddExpense()">
+                        <span>➕</span>
+                        <span>Add New</span>
+                    </button>
+                </div>
+
+                <!-- NO TRANSACTIONS STATE (uncomment when no transactions) -->
+                <!-- <div class="no-transactions">
+                    <div class="no-transactions-icon">📭</div>
+                    <h3>No transactions today</h3>
+                    <p>Start tracking your expenses by adding your first transaction</p>
+                    <button class="add-new-btn" onclick="goToAddExpense()" style="margin: 0 auto;">
+                        <span>➕</span>
+                        <span>Add New Transaction</span>
+                    </button>
+                </div> -->
+
+                <!-- TRANSACTIONS LIST (shown when transactions exist) -->
+                <div class="transaction-list" id="todayTransactions">
+                    <div class="transaction-item">
+                        <div class="transaction-left">
+                            <div class="transaction-icon" style="background: rgba(255, 107, 107, 0.15);">🍔</div>
+                            <div class="transaction-details">
+                                <h4>Food & Dining</h4>
+                                <p>Lunch at cafe • 2:30 PM</p>
+                            </div>
+                        </div>
+                        <div class="transaction-amount">-₹350</div>
+                    </div>
+
+                    <div class="transaction-item">
+                        <div class="transaction-left">
+                            <div class="transaction-icon" style="background: rgba(78, 205, 196, 0.15);">🚗</div>
+                            <div class="transaction-details">
+                                <h4>Transportation</h4>
+                                <p>Uber ride • 10:15 AM</p>
+                            </div>
+                        </div>
+                        <div class="transaction-amount">-₹250</div>
+                    </div>
+
+                    <div class="transaction-item">
+                        <div class="transaction-left">
+                            <div class="transaction-icon" style="background: rgba(167, 139, 250, 0.15);">🛒</div>
+                            <div class="transaction-details">
+                                <h4>Shopping</h4>
+                                <p>Grocery shopping • 9:00 AM</p>
+                            </div>
+                        </div>
+                        <div class="transaction-amount">-₹1,200</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHART OVERVIEW -->
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="section-icon">📊</span>
+                            Category Distribution
+                        </h2>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="section-icon">📈</span>
+                            Monthly Trend
+                        </h2>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CATEGORIES BREAKDOWN -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="section-icon">🗂️</span>
+                        Categories Breakdown
+                    </h2>
+                </div>
+
+                <div class="categories-grid">
+                    <div class="category-item food">
+                        <div class="category-left">
+                            <div class="category-icon">🍔</div>
+                            <div class="category-info">
+                                <h4>Food & Dining</h4>
+                                <div class="category-progress">
+                                    <div class="category-progress-bar" style="width: 29%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-right">
+                            <div class="category-amount">₹2,500</div>
+                            <div class="category-percentage">29%</div>
+                        </div>
+                    </div>
+
+                    <div class="category-item transport">
+                        <div class="category-left">
+                            <div class="category-icon">🚗</div>
+                            <div class="category-info">
+                                <h4>Transportation</h4>
+                                <div class="category-progress">
+                                    <div class="category-progress-bar" style="width: 21%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-right">
+                            <div class="category-amount">₹1,800</div>
+                            <div class="category-percentage">21%</div>
+                        </div>
+                    </div>
+
+                    <div class="category-item shopping">
+                        <div class="category-left">
+                            <div class="category-icon">🛒</div>
+                            <div class="category-info">
+                                <h4>Shopping</h4>
+                                <div class="category-progress">
+                                    <div class="category-progress-bar" style="width: 18%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-right">
+                            <div class="category-amount">₹1,500</div>
+                            <div class="category-percentage">18%</div>
+                        </div>
+                    </div>
+
+                    <div class="category-item utilities">
+                        <div class="category-left">
+                            <div class="category-icon">💡</div>
+                            <div class="category-info">
+                                <h4>Utilities</h4>
+                                <div class="category-progress">
+                                    <div class="category-progress-bar" style="width: 12%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-right">
+                            <div class="category-amount">₹1,000</div>
+                            <div class="category-percentage">12%</div>
+                        </div>
+                    </div>
+
+                    <div class="category-item entertainment">
+                        <div class="category-left">
+                            <div class="category-icon">🎬</div>
+                            <div class="category-info">
+                                <h4>Entertainment</h4>
+                                <div class="category-progress">
+                                    <div class="category-progress-bar" style="width: 10%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-right">
+                            <div class="category-amount">₹850</div>
+                            <div class="category-percentage">10%</div>
+                        </div>
+                    </div>
+
+                    <div class="category-item healthcare">
+                        <div class="category-left">
+                            <div class="category-icon">🏥</div>
+                            <div class="category-info">
+                                <h4>Healthcare</h4>
+                                <div class="category-progress">
+                                    <div class="category-progress-bar" style="width: 6%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-right">
+                            <div class="category-amount">₹500</div>
+                            <div class="category-percentage">6%</div>
+                        </div>
+                    </div>
+
+                    <div class="category-item education">
+                        <div class="category-left">
+                            <div class="category-icon">📚</div>
+                            <div class="category-info">
+                                <h4>Education</h4>
+                                <div class="category-progress">
+                                    <div class="category-progress-bar" style="width: 4%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-right">
+                            <div class="category-amount">₹350</div>
+                            <div class="category-percentage">4%</div>
+                        </div>
+                    </div>
+
+                    <div class="category-item other">
+                        <div class="category-left">
+                            <div class="category-icon">💳</div>
+                            <div class="category-info">
+                                <h4>Other</h4>
+                                <div class="category-progress">
+                                    <div class="category-progress-bar" style="width: 3%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-right">
+                            <div class="category-amount">₹250</div>
+                            <div class="category-percentage">3%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- API Configuration -->
+    <script src="js/api-config.js"></script>
+
+    <script>
+        // Check authentication
+        if (!Utils.requireAuth()) {
+            // Will redirect to login if not authenticated
+        }
+
+        // Load user data
+        const currentUser = AuthHelper.getUser();
+        if (currentUser) {
+            document.querySelector('.user-info h3').textContent = currentUser.name || 'User';
+            document.querySelector('.user-info p').textContent = currentUser.email || '';
+            document.querySelector('.user-avatar').textContent = (currentUser.name || 'U').charAt(0).toUpperCase();
+        }
+
+        // Initialize Charts
+        function initCharts() {
+            // Will be populated with real data
+        }
+
+        // Fetch and Display Dashboard Data
+        async function fetchDashboardData() {
+            try {
+                const response = await DashboardAPI.getDashboardData();
+
+                if (response.success) {
+                    updateDashboard(response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                Utils.showError('Failed to load dashboard data');
+            }
+        }
+
+        function updateDashboard(data) {
+            // Update summary stats
+            if (data.summary) {
+                const stats = data.summary;
+
+                // Total Expenses
+                const totalExpensesEl = document.querySelector('.stat-card:nth-child(1) .stat-value');
+                if (totalExpensesEl) {
+                    totalExpensesEl.textContent = `₹${stats.totalExpenses.toLocaleString()}`;
+                }
+
+                // Budget Remaining
+                const remainingEl = document.querySelector('.stat-card:nth-child(2) .stat-value');
+                if (remainingEl) {
+                    remainingEl.textContent = `₹${stats.remaining.toLocaleString()}`;
+                }
+
+                // Total Expenses Count
+                const countEl = document.querySelector('.stat-card:nth-child(3) .stat-value');
+                if (countEl) {
+                    // You can update this with actual transaction count if available
+                    countEl.textContent = data.recentExpenses ? data.recentExpenses.length : '0';
+                }
+
+                // Savings
+                const savingsEl = document.querySelector('.stat-card:nth-child(4) .stat-value');
+                if (savingsEl) {
+                    savingsEl.textContent = `₹${stats.totalSavings.toLocaleString()}`;
+                }
+            }
+
+            // Update today's transactions
+            if (data.todayExpenses && data.todayExpenses.transactions) {
+                updateTodayTransactions(data.todayExpenses.transactions);
+            }
+
+            // Update category breakdown
+            if (data.categoryBreakdown) {
+                updateCategoryBreakdown(data.categoryBreakdown);
+            }
+
+            // Update charts
+            if (data.categoryBreakdown) {
+                updateCharts(data.categoryBreakdown);
+            }
+        }
+
+        function updateTodayTransactions(transactions) {
+            const container = document.querySelector('.transaction-list');
+            if (!container) return;
+
+            if (transactions.length === 0) {
+                container.innerHTML = `
+                    <div class="no-transactions">
+                        <div class="no-transactions-icon">📭</div>
+                        <h3>No transactions today</h3>
+                        <p>Start tracking your expenses to see them here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = transactions.map(expense => {
+                const categoryIcons = {
+                    'Food & Dining': '🍔',
+                    'Transportation': '🚗',
+                    'Shopping': '🛒',
+                    'Utilities': '💡',
+                    'Healthcare': '🏥',
+                    'Entertainment': '🎬',
+                    'Education': '📚',
+                    'Rent': '🏠',
+                    'Other': '💳'
+                };
+
+                const icon = categoryIcons[expense.category] || '💰';
+                const time = new Date(expense.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+                return `
+                    <div class="transaction-item ${expense.category.toLowerCase().replace(/\s+&\s+/g, '-').replace(/\s+/g, '-')}">
+                        <div class="transaction-left">
+                            <div class="transaction-icon">${icon}</div>
+                            <div class="transaction-details">
+                                <h4>${expense.category}</h4>
+                                <p>${expense.description || 'No description'} • ${time}</p>
+                            </div>
+                        </div>
+                        <div class="transaction-amount">-₹${expense.amount.toFixed(2)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCategoryBreakdown(categories) {
+            const container = document.querySelector('.categories-grid');
+            if (!container) return;
+
+            const categoryIcons = {
+                'Food & Dining': '🍔',
+                'Transportation': '🚗',
+                'Shopping': '🛒',
+                'Utilities': '💡',
+                'Healthcare': '🏥',
+                'Entertainment': '🎬',
+                'Education': '📚',
+                'Rent': '🏠',
+                'Other': '💳'
+            };
+
+            const categoryClasses = {
+                'Food & Dining': 'food',
+                'Transportation': 'transport',
+                'Shopping': 'shopping',
+                'Utilities': 'utilities',
+                'Healthcare': 'healthcare',
+                'Entertainment': 'entertainment',
+                'Education': 'education',
+                'Rent': 'rent',
+                'Other': 'other'
+            };
+
+            container.innerHTML = categories.map(cat => {
+                const icon = categoryIcons[cat.category] || '💰';
+                const className = categoryClasses[cat.category] || 'other';
+
+                return `
+                    <div class="category-item ${className}">
+                        <div class="category-left">
+                            <div class="category-icon">${icon}</div>
+                            <div class="category-info">
+                                <h4>${cat.category}</h4>
+                                <div class="category-progress">
+                                    <div class="category-progress-bar" style="width: ${cat.percentage}%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-right">
+                            <div class="category-amount">₹${cat.amount.toFixed(0)}</div>
+                            <div class="category-percentage">${cat.percentage}%</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCharts(categoryData) {
+            const categoryColors = {
+                'Food & Dining': '#FF6B6B',
+                'Transportation': '#4ECDC4',
+                'Shopping': '#A78BFA',
+                'Utilities': '#FCD34D',
+                'Healthcare': '#EF4444',
+                'Entertainment': '#F472B6',
+                'Education': '#10B981',
+                'Rent': '#3B82F6',
+                'Other': '#9CA3AF'
+            };
+
+            // Pie Chart
+            const pieCtx = document.getElementById('pieChart');
+            if (pieCtx) {
+                new Chart(pieCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: categoryData.map(cat => cat.category),
+                        datasets: [{
+                            data: categoryData.map(cat => cat.amount),
+                            backgroundColor: categoryData.map(cat => categoryColors[cat.category] || '#9CA3AF'),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: { size: 12 }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Bar Chart - You can implement weekly/monthly trends here
+            const barCtx = document.getElementById('barChart');
+            if (barCtx) {
+                new Chart(barCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: categoryData.slice(0, 5).map(cat => cat.category.split(' ')[0]),
+                        datasets: [{
+                            label: 'Spending by Category',
+                            data: categoryData.slice(0, 5).map(cat => cat.amount),
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                            borderColor: '#3B82F6',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return '₹' + value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Toggle Sidebar for Mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('mobile-hidden');
+            overlay.classList.toggle('show');
+        }
+
+        // Navigation Functions
+        function goToAddExpense() {
+            window.location.href = 'add-expense.html';
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                AuthHelper.removeToken();
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            fetchDashboardData();
+        });
+    </script>
+</body>
+
+</html>

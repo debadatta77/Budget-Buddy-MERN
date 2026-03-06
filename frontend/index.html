@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetBuddy - Login/Register</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .auth-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* LEFT SECTION - Branding */
+        .branding-section {
+            flex: 1;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1px 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .branding-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .branding-content {
+            max-width: 350px;
+            width: 100%;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .logo-section {
+            margin-bottom: 12px;
+        }
+
+        .logo-icon {
+            font-size: 48px;
+            margin-bottom: 1px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .tagline {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .illustration {
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .illustration-content {
+            font-size: 80px;
+            text-align: center;
+        }
+
+        .features-list {
+            text-align: left;
+            margin: 0 auto;
+            max-width: 220px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 13px;
+            animation: slideInLeft 0.6s ease-out backwards;
+        }
+
+        .feature-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .feature-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .feature-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .feature-item:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            background: #10B981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .check-icon::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* RIGHT SECTION - Auth Form */
+        .form-section {
+            flex: 1;
+            background: #F9FAFB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 20px;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            max-width: 420px;
+            width: 100%;
+            animation: fadeInScale 0.6s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .form-subtitle {
+            font-size: 13px;
+            color: #4B5563;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #9CA3AF;
+            pointer-events: none;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 44px;
+            padding: 10px 16px 10px 44px;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #111827;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-input::placeholder {
+            color: #9CA3AF;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input.error {
+            border-color: #EF4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 20px;
+            color: #9CA3AF;
+            user-select: none;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: #4B5563;
+        }
+
+        .error-message {
+            display: none;
+            font-size: 12px;
+            color: #EF4444;
+            margin-top: 6px;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-input {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            cursor: pointer;
+            accent-color: #3B82F6;
+        }
+
+        .checkbox-label {
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        .forgot-password {
+            font-size: 14px;
+            color: #3B82F6;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+            color: #2563EB;
+        }
+
+        .submit-btn {
+            width: 100%;
+            height: 44px;
+            background: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+
+        .submit-btn:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .divider span {
+            padding: 0 12px;
+            color: #6B7280;
+            font-size: 14px;
+        }
+
+        .switch-form {
+            text-align: center;
+            font-size: 14px;
+            color: #4B5563;
+        }
+
+        .switch-link {
+            color: #3B82F6;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .switch-link:hover {
+            text-decoration: underline;
+            color: #2563EB;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1024px) {
+            .branding-section {
+                padding: 60px 40px;
+            }
+
+            .form-container {
+                padding: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+            }
+
+            .branding-section {
+                padding: 40px 24px;
+                min-height: 40vh;
+            }
+
+            .logo-icon {
+                font-size: 48px;
+            }
+
+            .logo-text {
+                font-size: 28px;
+            }
+
+            .tagline {
+                font-size: 16px;
+                margin-bottom: 30px;
+            }
+
+            .illustration {
+                display: none;
+            }
+
+            .features-list {
+                display: none;
+            }
+
+            .form-section {
+                padding: 32px 24px;
+            }
+
+            .form-container {
+                padding: 32px 24px;
+                box-shadow: none;
+            }
+
+            .form-title {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-container">
+        <!-- LEFT SECTION - Branding -->
+        <div class="branding-section">
+            <div class="branding-content">
+                <div class="logo-section">
+                    <div class="logo-icon">💰</div>
+                    <div class="logo-text">BudgetBuddy</div>
+                </div>
+
+                <div class="tagline">
+                    Your Smart Companion for Smarter Spending
+                </div>
+
+                <div class="illustration">
+                    <div class="illustration-content">📊💳💵</div>
+                </div>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="check-icon"></div>
+                        <span>Track Expenses Easily</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="check-icon"></div>
+                        <span>Set Monthly Budgets</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="check-icon"></div>
+                        <span>Achieve Saving Goals</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="check-icon"></div>
+                        <span>View Detailed Analytics</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SECTION - Auth Form -->
+        <div class="form-section">
+            <div class="form-container">
+                <!-- LOGIN FORM -->
+                <div id="loginForm">
+                    <div class="form-header">
+                        <h1 class="form-title">Welcome Back! 👋</h1>
+                        <p class="form-subtitle">Login to manage your finances</p>
+                    </div>
+
+                    <form>
+                        <div class="form-group">
+                            <label class="form-label" for="loginEmail">Email</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">📧</span>
+                                <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com"
+                                    required>
+                            </div>
+                            <div class="error-message">Please enter a valid email</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="loginPassword">Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="loginPassword" class="form-input" placeholder="••••••••"
+                                    required>
+                                <span class="password-toggle" onclick="togglePassword('loginPassword')">👁️</span>
+                            </div>
+                            <div class="error-message">Password is required</div>
+                        </div>
+
+                        <div class="form-options">
+                            <label class="remember-me">
+                                <input type="checkbox" class="checkbox-input">
+                                <span class="checkbox-label">Remember me</span>
+                            </label>
+                            <a href="#" class="forgot-password">Forgot Password?</a>
+                        </div>
+
+                        <button type="submit" class="submit-btn">Login</button>
+
+                        <div class="divider">
+                            <span>or</span>
+                        </div>
+
+                        <div class="switch-form">
+                            Don't have an account?
+                            <a class="switch-link" onclick="switchToRegister()">Register</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- REGISTER FORM -->
+                <div id="registerForm" class="hidden">
+                    <div class="form-header">
+                        <h1 class="form-title">Create Account 🚀</h1>
+                        <p class="form-subtitle">Start managing your finances today</p>
+                    </div>
+
+                    <form>
+                        <div class="form-group">
+                            <label class="form-label" for="registerName">Full Name</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">👤</span>
+                                <input type="text" id="registerName" class="form-input" placeholder="John Doe" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="registerEmail">Email</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">📧</span>
+                                <input type="email" id="registerEmail" class="form-input" placeholder="you@example.com"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="registerPassword">Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="registerPassword" class="form-input" placeholder="••••••••"
+                                    required>
+                                <span class="password-toggle" onclick="togglePassword('registerPassword')">👁️</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="confirmPassword">Confirm Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="confirmPassword" class="form-input" placeholder="••••••••"
+                                    required>
+                                <span class="password-toggle" onclick="togglePassword('confirmPassword')">👁️</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn">Create Account</button>
+
+                        <div class="divider">
+                            <span>or</span>
+                        </div>
+
+                        <div class="switch-form">
+                            Already have an account?
+                            <a class="switch-link" onclick="switchToLogin()">Login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Configuration -->
+    <script src="js/api-config.js"></script>
+
+    <script>
+        // Check if already logged in
+        if (AuthHelper.isLoggedIn()) {
+            window.location.href = 'dashboard.html';
+        }
+
+        function switchToRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        function switchToLogin() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const toggle = input.nextElementSibling;
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                toggle.textContent = '👁️';
+            }
+        }
+
+        // Handle Login Form Submit
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const submitBtn = this.querySelector('button[type="submit"]');
+
+            // Validation
+            if (!email || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            try {
+                // Disable button and show loading
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Logging in...';
+
+                // Call login API
+                const response = await AuthAPI.login(email, password);
+
+                if (response.success) {
+                    // Save token and user data
+                    AuthHelper.saveToken(response.token);
+                    AuthHelper.saveUser(response.user);
+
+                    // Redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert(response.message || 'Login failed');
+                }
+            } catch (error) {
+                alert(error.message || 'Login failed. Please check your credentials.');
+                console.error('Login error:', error);
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Login';
+            }
+        });
+
+        // Handle Register Form Submit
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const submitBtn = this.querySelector('button[type="submit"]');
+
+            // Validation
+            if (!name || !email || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
+
+            try {
+                // Disable button and show loading
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Creating Account...';
+
+                // Call register API
+                const response = await AuthAPI.register(name, email, password);
+
+                if (response.success) {
+                    // Save token and user data
+                    AuthHelper.saveToken(response.token);
+                    AuthHelper.saveUser(response.user);
+
+                    alert('Account created successfully!');
+
+                    // Redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert(response.message || 'Registration failed');
+                }
+            } catch (error) {
+                alert(error.message || 'Registration failed. Email may already be in use.');
+                console.error('Register error:', error);
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+            }
+        });
+    </script>
+</body>
+
+</html>

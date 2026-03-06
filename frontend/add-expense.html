@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Expense - BudgetBuddy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #F9FAFB;
+            color: #111827;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR NAVIGATION */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-icon {
+            font-size: 36px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #10B981, #3B82F6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .user-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            opacity: 0.8;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: white;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            padding: 14px 16px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 32px;
+            max-width: calc(100vw - 280px);
+        }
+
+        .mobile-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu-btn {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: #6B7280;
+        }
+
+        /* FORM SECTION */
+        .form-section {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .expense-form {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #F3F4F6;
+        }
+
+        .form-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .required-star {
+            color: #EF4444;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #111827;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input.error,
+        .form-select.error,
+        .form-textarea.error {
+            border-color: #EF4444;
+        }
+
+        .form-input[type="number"] {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 40px;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .input-prefix {
+            position: relative;
+        }
+
+        .input-prefix .form-input {
+            padding-left: 36px;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            font-weight: 600;
+            color: #6B7280;
+            pointer-events: none;
+        }
+
+        .category-preview {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #F9FAFB;
+            border-radius: 12px;
+            margin-top: 12px;
+            border-left: 4px solid #E5E7EB;
+            transition: all 0.3s ease;
+        }
+
+        .category-preview.show {
+            display: flex;
+        }
+
+        .category-preview.hide {
+            display: none;
+        }
+
+        .category-icon-large {
+            font-size: 36px;
+            width: 60px;
+            height: 60px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .category-details h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .category-details p {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .error-message {
+            display: none;
+            font-size: 13px;
+            color: #EF4444;
+            margin-top: 6px;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .helper-text {
+            font-size: 13px;
+            color: #6B7280;
+            margin-top: 6px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid #F3F4F6;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #F3F4F6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #E5E7EB;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* QUICK ADD SECTION */
+        .quick-add-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .quick-add-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .quick-add-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .quick-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .quick-category {
+            padding: 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-category:hover {
+            border-color: #3B82F6;
+            background: rgba(59, 130, 246, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .quick-category.selected {
+            border-color: #3B82F6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .quick-category-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .quick-category-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* CATEGORY COLORS */
+        .food-color {
+            border-left-color: #FF6B6B !important;
+        }
+
+        .food-color .category-icon-large {
+            background: rgba(255, 107, 107, 0.1) !important;
+        }
+
+        .transport-color {
+            border-left-color: #4ECDC4 !important;
+        }
+
+        .transport-color .category-icon-large {
+            background: rgba(78, 205, 196, 0.1) !important;
+        }
+
+        .shopping-color {
+            border-left-color: #A78BFA !important;
+        }
+
+        .shopping-color .category-icon-large {
+            background: rgba(167, 139, 250, 0.1) !important;
+        }
+
+        .utilities-color {
+            border-left-color: #FCD34D !important;
+        }
+
+        .utilities-color .category-icon-large {
+            background: rgba(252, 211, 77, 0.1) !important;
+        }
+
+        .healthcare-color {
+            border-left-color: #EF4444 !important;
+        }
+
+        .healthcare-color .category-icon-large {
+            background: rgba(239, 68, 68, 0.1) !important;
+        }
+
+        .entertainment-color {
+            border-left-color: #F472B6 !important;
+        }
+
+        .entertainment-color .category-icon-large {
+            background: rgba(244, 114, 182, 0.1) !important;
+        }
+
+        .education-color {
+            border-left-color: #10B981 !important;
+        }
+
+        .education-color .category-icon-large {
+            background: rgba(16, 185, 129, 0.1) !important;
+        }
+
+        .rent-color {
+            border-left-color: #8B5CF6 !important;
+        }
+
+        .rent-color .category-icon-large {
+            background: rgba(139, 92, 246, 0.1) !important;
+        }
+
+        .other-color {
+            border-left-color: #6B7280 !important;
+        }
+
+        .other-color .category-icon-large {
+            background: rgba(107, 114, 128, 0.1) !important;
+        }
+
+        /* SUCCESS MESSAGE */
+        .success-message {
+            display: none;
+            background: #10B981;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            align-items: center;
+            gap: 12px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .success-message.show {
+            display: flex;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-icon {
+            font-size: 24px;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-visible {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+                max-width: 100vw;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .expense-form {
+                padding: 24px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .quick-categories {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* OVERLAY FOR MOBILE SIDEBAR */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">💰</div>
+                <div class="logo-text">BudgetBuddy</div>
+            </div>
+
+            <div class="user-profile">
+                <div class="user-avatar">U</div>
+                <div class="user-info">
+                    <h3>User</h3>
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="nav-icon">🏠</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="add-expense.html" class="nav-item active">
+                    <span class="nav-icon">➕</span>
+                    <span>Add Expense</span>
+                </a>
+                <a href="view-expenses.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>View Expenses</span>
+                </a>
+                <a href="budget-savings.html" class="nav-item">
+                    <span class="nav-icon">💰</span>
+                    <span>Budget & Savings</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span>Profile Info</span>
+                </a>
+            </div>
+
+            <button class="logout-btn" onclick="logout()">
+                <span class="nav-icon">🚪</span>
+                <span>Logout</span>
+            </button>
+        </nav>
+
+        <!-- OVERLAY -->
+        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- MOBILE HEADER -->
+            <div class="mobile-header">
+                <div class="mobile-menu-btn" onclick="toggleSidebar()">☰</div>
+                <div class="logo-text">💰 BudgetBuddy</div>
+                <div style="width: 32px;"></div>
+            </div>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+                <h1>Add New Expense 💸</h1>
+                <p>Track your spending by adding a new expense</p>
+            </div>
+
+            <!-- SUCCESS MESSAGE -->
+            <div class="success-message" id="successMessage">
+                <span class="success-icon">✅</span>
+                <div>
+                    <strong>Expense Added Successfully!</strong>
+                    <p style="font-size: 14px; margin-top: 4px;">Your expense has been recorded.</p>
+                </div>
+            </div>
+
+            <!-- FORM SECTION -->
+            <div class="form-section">
+                <!-- QUICK ADD CATEGORIES -->
+                <div class="quick-add-section">
+                    <div class="quick-add-header">
+                        <span style="font-size: 20px;">⚡</span>
+                        <h3>Quick Select Category</h3>
+                    </div>
+                    <div class="quick-categories">
+                        <div class="quick-category" data-category="Food & Dining" data-icon="🍔"
+                            onclick="selectQuickCategory(this)">
+                            <div class="quick-category-icon">🍔</div>
+                            <div class="quick-category-name">Food</div>
+                        </div>
+                        <div class="quick-category" data-category="Transportation" data-icon="🚗"
+                            onclick="selectQuickCategory(this)">
+                            <div class="quick-category-icon">🚗</div>
+                            <div class="quick-category-name">Transport</div>
+                        </div>
+                        <div class="quick-category" data-category="Shopping" data-icon="🛒"
+                            onclick="selectQuickCategory(this)">
+                            <div class="quick-category-icon">🛒</div>
+                            <div class="quick-category-name">Shopping</div>
+                        </div>
+                        <div class="quick-category" data-category="Utilities" data-icon="💡"
+                            onclick="selectQuickCategory(this)">
+                            <div class="quick-category-icon">💡</div>
+                            <div class="quick-category-name">Utilities</div>
+                        </div>
+                        <div class="quick-category" data-category="Healthcare" data-icon="🏥"
+                            onclick="selectQuickCategory(this)">
+                            <div class="quick-category-icon">🏥</div>
+                            <div class="quick-category-name">Healthcare</div>
+                        </div>
+                        <div class="quick-category" data-category="Entertainment" data-icon="🎬"
+                            onclick="selectQuickCategory(this)">
+                            <div class="quick-category-icon">🎬</div>
+                            <div class="quick-category-name">Entertainment</div>
+                        </div>
+                        <div class="quick-category" data-category="Other" data-icon="💳"
+                            onclick="selectQuickCategory(this)">
+                            <div class="quick-category-icon">💳</div>
+                            <div class="quick-category-name">Other</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EXPENSE FORM -->
+                <form class="expense-form" id="expenseForm" onsubmit="handleSubmit(event)">
+                    <div class="form-header">
+                        <h2>Expense Details</h2>
+                        <p>Fill in the information below to record your expense</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <!-- AMOUNT -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                Amount <span class="required-star">*</span>
+                            </label>
+                            <div class="input-prefix">
+                                <span class="currency-symbol">₹</span>
+                                <input type="number" class="form-input" id="amount" name="amount" placeholder="0"
+                                    min="0" step="0.01" required>
+                            </div>
+                            <div class="error-message" id="amountError">Please enter a valid amount</div>
+                            <div class="helper-text">Enter the amount you spent</div>
+                        </div>
+
+                        <!-- CATEGORY -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                Category <span class="required-star">*</span>
+                            </label>
+                            <select class="form-select" id="category" name="category" required
+                                onchange="updateCategoryPreview()">
+                                <option value="">Select a category</option>
+                                <option value="Food & Dining" data-icon="🍔">🍔 Food & Dining</option>
+                                <option value="Transportation" data-icon="🚗">🚗 Transportation</option>
+                                <option value="Shopping" data-icon="🛒">🛒 Shopping</option>
+                                <option value="Utilities" data-icon="💡">💡 Utilities</option>
+                                <option value="Healthcare" data-icon="🏥">🏥 Healthcare</option>
+                                <option value="Entertainment" data-icon="🎬">🎬 Entertainment</option>
+                                <option value="Education" data-icon="📚">📚 Education</option>
+                                <option value="Rent" data-icon="🏠">🏠 Rent</option>
+                                <option value="Other" data-icon="💳">💳 Other</option>
+                            </select>
+                            <div class="error-message" id="categoryError">Please select a category</div>
+
+                            <!-- CATEGORY PREVIEW -->
+                            <div class="category-preview hide" id="categoryPreview">
+                                <div class="category-icon-large" id="categoryIconLarge">🍔</div>
+                                <div class="category-details">
+                                    <h4 id="categoryName">Food & Dining</h4>
+                                    <p id="categoryDescription">Meals, groceries, and dining expenses</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DATE -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                Date <span class="required-star">*</span>
+                            </label>
+                            <input type="date" class="form-input" id="date" name="date" required>
+                            <div class="error-message" id="dateError">Please select a date</div>
+                            <div class="helper-text">When did you make this expense?</div>
+                        </div>
+
+                        <!-- DESCRIPTION -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                Description <span style="color: #9CA3AF;">(Optional)</span>
+                            </label>
+                            <textarea class="form-textarea" id="description" name="description"
+                                placeholder="Add notes about this expense (e.g., 'Lunch at cafe', 'Monthly electricity bill')"></textarea>
+                            <div class="helper-text">Add any additional details about this expense</div>
+                        </div>
+                    </div>
+
+                    <!-- FORM ACTIONS -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <span>🔄</span>
+                            <span>Clear</span>
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <span>✅</span>
+                            <span>Add Expense</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- API Configuration -->
+    <script src="js/api-config.js"></script>
+
+    <script>
+        // Check authentication
+        if (!Utils.requireAuth()) {
+            // Will redirect to login if not authenticated
+        }
+
+        // Load user data
+        const currentUser = AuthHelper.getUser();
+        if (currentUser) {
+            document.querySelector('.user-info h3').textContent = currentUser.name || 'User';
+            document.querySelector('.user-info p').textContent = currentUser.email || '';
+            document.querySelector('.user-avatar').textContent = (currentUser.name || 'U').charAt(0).toUpperCase();
+        }
+
+        // Category data with descriptions
+        const categoryData = {
+            "Food & Dining": {
+                icon: "🍔",
+                description: "Meals, groceries, and dining expenses",
+                color: "food-color"
+            },
+            "Transportation": {
+                icon: "🚗",
+                description: "Fuel, public transport, and ride-sharing",
+                color: "transport-color"
+            },
+            "Shopping": {
+                icon: "🛒",
+                description: "Clothing, electronics, and general shopping",
+                color: "shopping-color"
+            },
+            "Utilities": {
+                icon: "💡",
+                description: "Electricity, water, internet, and bills",
+                color: "utilities-color"
+            },
+            "Healthcare": {
+                icon: "🏥",
+                description: "Medical, pharmacy, and health insurance",
+                color: "healthcare-color"
+            },
+            "Entertainment": {
+                icon: "🎬",
+                description: "Movies, games, and leisure activities",
+                color: "entertainment-color"
+            },
+            "Education": {
+                icon: "📚",
+                description: "Books, courses, and learning materials",
+                color: "education-color"
+            },
+            "Rent": {
+                icon: "🏠",
+                description: "Monthly rent and housing costs",
+                color: "rent-color"
+            },
+            "Other": {
+                icon: "💳",
+                description: "Miscellaneous and other expenses",
+                color: "other-color"
+            }
+        };
+
+        // Set today's date as default
+        document.addEventListener('DOMContentLoaded', function () {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            document.getElementById('date').max = today; // Prevent future dates
+        });
+
+        // Toggle Sidebar for Mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('mobile-visible');
+            overlay.classList.toggle('show');
+        }
+
+        // Quick Category Selection
+        function selectQuickCategory(element) {
+            // Remove selection from all quick categories
+            document.querySelectorAll('.quick-category').forEach(cat => {
+                cat.classList.remove('selected');
+            });
+
+            // Add selection to clicked category
+            element.classList.add('selected');
+
+            // Update the dropdown
+            const category = element.getAttribute('data-category');
+            document.getElementById('category').value = category;
+
+            // Update preview
+            updateCategoryPreview();
+        }
+
+        // Update Category Preview
+        function updateCategoryPreview() {
+            const categorySelect = document.getElementById('category');
+            const selectedCategory = categorySelect.value;
+            const preview = document.getElementById('categoryPreview');
+
+            if (selectedCategory && categoryData[selectedCategory]) {
+                const data = categoryData[selectedCategory];
+
+                // Update preview content
+                document.getElementById('categoryIconLarge').textContent = data.icon;
+                document.getElementById('categoryName').textContent = selectedCategory;
+                document.getElementById('categoryDescription').textContent = data.description;
+
+                // Remove all color classes
+                preview.classList.remove('food-color', 'transport-color', 'shopping-color', 'utilities-color',
+                    'healthcare-color', 'entertainment-color', 'education-color', 'rent-color', 'other-color');
+
+                // Add appropriate color class
+                preview.classList.add(data.color);
+
+                // Show preview
+                preview.classList.remove('hide');
+                preview.classList.add('show');
+            } else {
+                preview.classList.remove('show');
+                preview.classList.add('hide');
+            }
+        }
+
+        // Form Validation
+        function validateForm() {
+            let isValid = true;
+
+            // Validate Amount
+            const amount = document.getElementById('amount');
+            const amountError = document.getElementById('amountError');
+            if (!amount.value || parseFloat(amount.value) <= 0) {
+                amount.classList.add('error');
+                amountError.classList.add('show');
+                isValid = false;
+            } else {
+                amount.classList.remove('error');
+                amountError.classList.remove('show');
+            }
+
+            // Validate Category
+            const category = document.getElementById('category');
+            const categoryError = document.getElementById('categoryError');
+            if (!category.value) {
+                category.classList.add('error');
+                categoryError.classList.add('show');
+                isValid = false;
+            } else {
+                category.classList.remove('error');
+                categoryError.classList.remove('show');
+            }
+
+            // Validate Date
+            const date = document.getElementById('date');
+            const dateError = document.getElementById('dateError');
+            if (!date.value) {
+                date.classList.add('error');
+                dateError.classList.add('show');
+                isValid = false;
+            } else {
+                date.classList.remove('error');
+                dateError.classList.remove('show');
+            }
+
+            return isValid;
+        }
+
+        // Handle Form Submit
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            if (!validateForm()) {
+                return;
+            }
+
+            // Get form data
+            const expenseData = {
+                amount: parseFloat(document.getElementById('amount').value),
+                category: document.getElementById('category').value,
+                date: document.getElementById('date').value,
+                description: document.getElementById('description').value || ''
+            };
+
+            const submitBtn = document.querySelector('.btn-primary');
+            const originalText = submitBtn.innerHTML;
+
+            try {
+                // Disable button and show loading
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span>⏳</span><span>Adding...</span>';
+
+                // Submit to API
+                const response = await ExpenseAPI.addExpense(expenseData);
+
+                if (response.success) {
+                    // Show success message
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.classList.add('show');
+
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    // Hide success message and redirect
+                    setTimeout(() => {
+                        successMessage.classList.remove('show');
+                        window.location.href = 'view-expenses.html';
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Error submitting expense:', error);
+                alert(error.message || 'Failed to add expense. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+
+        // Reset Form
+        function resetForm() {
+            document.getElementById('expenseForm').reset();
+            document.getElementById('categoryPreview').classList.remove('show');
+            document.getElementById('categoryPreview').classList.add('hide');
+
+            // Remove selections
+            document.querySelectorAll('.quick-category').forEach(cat => {
+                cat.classList.remove('selected');
+            });
+
+            // Remove error states
+            document.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(input => {
+                input.classList.remove('error');
+            });
+            document.querySelectorAll('.error-message').forEach(error => {
+                error.classList.remove('show');
+            });
+
+            // Reset date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+        }
+
+        // Logout Function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                AuthHelper.removeToken();
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+
+</html>

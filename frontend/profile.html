@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - BudgetBuddy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #F9FAFB;
+            color: #111827;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR NAVIGATION */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-icon {
+            font-size: 36px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #10B981, #3B82F6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .user-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            opacity: 0.8;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: white;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            padding: 14px 16px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 32px;
+            max-width: calc(100vw - 280px);
+        }
+
+        .mobile-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu-btn {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: #6B7280;
+        }
+
+        /* PROFILE SECTIONS */
+        .profile-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .profile-section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #F3F4F6;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .edit-profile-btn {
+            padding: 10px 20px;
+            background: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .edit-profile-btn:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* PROFILE CARD */
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 24px;
+            background: linear-gradient(135deg, #F9FAFB 0%, #EFF6FF 100%);
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .profile-email {
+            font-size: 16px;
+            color: #6B7280;
+            margin-bottom: 12px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .profile-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            background: white;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #3B82F6;
+            border: 2px solid #3B82F6;
+        }
+
+        /* PROFILE DETAILS */
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .detail-item {
+            padding: 20px;
+            background: #F9FAFB;
+            border-radius: 12px;
+            border: 2px solid #E5E7EB;
+        }
+
+        .detail-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .detail-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .detail-icon {
+            margin-right: 8px;
+        }
+
+        /* FORM STYLES */
+        .form-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .required-star {
+            color: #EF4444;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #111827;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input:disabled {
+            background: #F3F4F6;
+            color: #6B7280;
+            cursor: not-allowed;
+        }
+
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 40px;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .helper-text {
+            font-size: 13px;
+            color: #6B7280;
+            margin-top: 6px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: #F3F4F6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #E5E7EB;
+        }
+
+        .btn-success {
+            background: #10B981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* SUCCESS MESSAGE */
+        .success-message {
+            display: none;
+            padding: 16px 20px;
+            background: #D1FAE5;
+            border: 2px solid #10B981;
+            border-radius: 12px;
+            color: #065F46;
+            font-weight: 600;
+            margin-bottom: 20px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .success-message.show {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-icon {
+            font-size: 24px;
+        }
+
+        /* STATS SECTION */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .stat-box {
+            padding: 20px;
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6B7280;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1E40AF;
+        }
+
+        /* EDIT MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #F3F4F6;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #F3F4F6;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #E5E7EB;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1024px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-visible {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                max-width: 100vw;
+                padding: 20px;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .profile-section {
+                padding: 20px;
+            }
+
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-avatar-large {
+                width: 100px;
+                height: 100px;
+                font-size: 40px;
+            }
+
+            .profile-name {
+                font-size: 24px;
+            }
+
+            .profile-badges {
+                justify-content: center;
+            }
+
+            .profile-details {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* OVERLAY FOR MOBILE SIDEBAR */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">💰</div>
+                <div class="logo-text">BudgetBuddy</div>
+            </div>
+
+            <div class="user-profile">
+                <div class="user-avatar">AK</div>
+                <div class="user-info">
+                    <h3>Loading Profile...</h3>
+                    <p>Please wait...</p>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="nav-icon">🏠</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="add-expense.html" class="nav-item">
+                    <span class="nav-icon">➕</span>
+                    <span>Add Expense</span>
+                </a>
+                <a href="view-expenses.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>View Expenses</span>
+                </a>
+                <a href="budget-savings.html" class="nav-item">
+                    <span class="nav-icon">💎</span>
+                    <span>Budget & Savings</span>
+                </a>
+                <a href="profile.html" class="nav-item active">
+                    <span class="nav-icon">👤</span>
+                    <span>Profile</span>
+                </a>
+            </nav>
+
+            <button class="logout-btn" onclick="logout()">
+                <span>🚪</span>
+                <span>Logout</span>
+            </button>
+        </nav>
+
+        <!-- OVERLAY -->
+        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- MOBILE HEADER -->
+            <div class="mobile-header">
+                <div class="mobile-menu-btn" onclick="toggleSidebar()">☰</div>
+                <div class="logo-text">BudgetBuddy</div>
+            </div>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+                <h1>👤 My Profile</h1>
+                <p>Manage your account settings and preferences</p>
+            </div>
+
+            <div class="profile-container">
+                <!-- PROFILE INFORMATION SECTION -->
+                <div class="profile-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span>📋</span>
+                            <span>Profile Information</span>
+                        </h2>
+                        <button class="edit-profile-btn" onclick="openEditModal()">
+                            <span>✏️</span>
+                            <span>Edit Profile</span>
+                        </button>
+                    </div>
+
+                    <!-- PROFILE CARD -->
+                    <div class="profile-card">
+                        <div class="profile-avatar-large" id="profileAvatar">AK</div>
+                        <div class="profile-info">
+                            <h2 class="profile-name" id="profileName">Loading...</h2>
+                            <p class="profile-email" id="profileEmail">Loading...</p>
+                            <div class="profile-badges">
+                                <span class="badge">✅ Verified</span>
+                                <span class="badge">🌟 Premium User</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PROFILE DETAILS -->
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <div class="detail-label">First Name</div>
+                            <div class="detail-value">
+                                <span class="detail-icon">👤</span>
+                                <span id="displayFirstName">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Last Name</div>
+                            <div class="detail-value">
+                                <span class="detail-icon">👤</span>
+                                <span id="displayLastName">Kumar</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Email Address</div>
+                            <div class="detail-value">
+                                <span class="detail-icon">📧</span>
+                                <span id="displayEmail">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Member Since</div>
+                            <div class="detail-value">
+                                <span class="detail-icon">📅</span>
+                                <span>January 2026</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACCOUNT STATISTICS -->
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-label">Total Expenses</div>
+                            <div class="stat-value">-</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-label">Goals Achieved</div>
+                            <div class="stat-value">-</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-icon">💎</div>
+                            <div class="stat-label">Total Saved</div>
+                            <div class="stat-value">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTACT US SECTION -->
+                <div class="profile-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span>📞</span>
+                            <span>Contact Us</span>
+                        </h2>
+                    </div>
+
+                    <div class="success-message" id="contactSuccessMessage">
+                        <span class="success-icon">✅</span>
+                        <span>Your message has been sent successfully! We'll get back to you soon.</span>
+                    </div>
+
+                    <form class="form-grid" id="contactForm" onsubmit="handleContactSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Name
+                                    <span class="required-star">*</span>
+                                </label>
+                                <input type="text" class="form-input" id="contactName" placeholder="Your full name"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Phone Number
+                                </label>
+                                <input type="tel" class="form-input" id="contactPhone" placeholder="+91 98765 43210">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Email Address
+                                <span class="required-star">*</span>
+                            </label>
+                            <input type="email" class="form-input" id="contactEmail"
+                                placeholder="your.email@example.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Query Type
+                                <span class="required-star">*</span>
+                            </label>
+                            <select class="form-select" id="queryType" required>
+                                <option value="">Select query type</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="technical">Technical Support</option>
+                                <option value="billing">Billing & Payments</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="bug">Report a Bug</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Message
+                                <span class="required-star">*</span>
+                            </label>
+                            <textarea class="form-textarea" id="contactMessage"
+                                placeholder="Please describe your query in detail..." required></textarea>
+                            <span class="helper-text">Minimum 10 characters</span>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success">
+                                <span>📧</span>
+                                <span>Send Message</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetContactForm()">
+                                <span>🔄</span>
+                                <span>Clear Form</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- EDIT PROFILE MODAL -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Profile</h2>
+                <button class="modal-close" onclick="closeEditModal()">✕</button>
+            </div>
+
+            <div class="success-message" id="editSuccessMessage">
+                <span class="success-icon">✅</span>
+                <span>Profile updated successfully!</span>
+            </div>
+
+            <form class="form-grid" id="editProfileForm" onsubmit="handleProfileUpdate(event)">
+                <div class="form-group">
+                    <label class="form-label">
+                        First Name
+                        <span class="required-star">*</span>
+                    </label>
+                    <input type="text" class="form-input" id="editFirstName" placeholder="First Name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Last Name
+                        <span class="required-star">*</span>
+                    </label>
+                    <input type="text" class="form-input" id="editLastName" placeholder="Kumar" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Email Address
+                        <span class="required-star">*</span>
+                    </label>
+                    <input type="email" class="form-input" id="editEmail" placeholder="Email" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span>💾</span>
+                        <span>Save Changes</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
+                        <span>✕</span>
+                        <span>Cancel</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // MOCK USER DATA - Will be replaced with API calls
+        let userData = {
+            firstName: 'User',
+            lastName: 'Name',
+            email: 'user@example.com'
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            loadUserProfile();
+            // Populate contact form with user data
+            document.getElementById('contactName').value = userData.firstName + ' ' + userData.lastName;
+            document.getElementById('contactEmail').value = userData.email;
+        });
+
+        // Toggle Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('mobile-visible');
+            overlay.classList.toggle('show');
+        }
+
+        // Load User Profile
+        function loadUserProfile() {
+            // Update profile display
+            document.getElementById('profileName').textContent = userData.firstName + ' ' + userData.lastName;
+            document.getElementById('profileEmail').textContent = userData.email;
+            document.getElementById('displayFirstName').textContent = userData.firstName;
+            document.getElementById('displayLastName').textContent = userData.lastName;
+            document.getElementById('displayEmail').textContent = userData.email;
+
+            // Update avatar
+            const initials = userData.firstName.charAt(0) + userData.lastName.charAt(0);
+            document.getElementById('profileAvatar').textContent = initials.toUpperCase();
+
+            // API call would go here
+            // await fetchUserProfile();
+        }
+
+        // Edit Profile Modal
+        function openEditModal() {
+            document.getElementById('editFirstName').value = userData.firstName;
+            document.getElementById('editLastName').value = userData.lastName;
+            document.getElementById('editEmail').value = userData.email;
+            document.getElementById('editModal').classList.add('show');
+            document.getElementById('editSuccessMessage').classList.remove('show');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+        }
+
+        function handleProfileUpdate(event) {
+            event.preventDefault();
+
+            // Get form values
+            const firstName = document.getElementById('editFirstName').value.trim();
+            const lastName = document.getElementById('editLastName').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+
+            // Update user data
+            userData.firstName = firstName;
+            userData.lastName = lastName;
+            userData.email = email;
+
+            // API call would go here
+            // await updateUserProfile(userData);
+
+            // Update display
+            loadUserProfile();
+
+            // Show success message
+            document.getElementById('editSuccessMessage').classList.add('show');
+
+            // Close modal after 2 seconds
+            setTimeout(() => {
+                closeEditModal();
+            }, 2000);
+        }
+
+        // Contact Form
+        async function handleContactSubmit(event) {
+            console.log('handleContactSubmit called');
+            event.preventDefault();
+
+            // Get form values
+            const contactData = {
+                name: document.getElementById('contactName').value.trim(),
+                phone: document.getElementById('contactPhone').value.trim(),
+                email: document.getElementById('contactEmail').value.trim(),
+                queryType: document.getElementById('queryType').value,
+                message: document.getElementById('contactMessage').value.trim()
+            };
+
+            console.log('Form data:', contactData);
+
+            // Validate
+            if (!contactData.name) {
+                alert('Please enter your name');
+                return;
+            }
+
+            if (!contactData.email) {
+                alert('Please enter your email');
+                return;
+            }
+
+            if (!contactData.queryType) {
+                alert('Please select a query type');
+                return;
+            }
+
+            if (contactData.message.length < 10) {
+                alert('Please provide a more detailed message (minimum 10 characters)');
+                return;
+            }
+
+            console.log('Validation passed, submitting...');
+
+            // Show loading state
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '📤 Sending...';
+
+            try {
+                // Submit to Google Sheets
+                await submitContactForm(contactData);
+
+                console.log('Submission successful');
+                // Show success message
+                alert('✅ Message sent successfully! We will get back to you soon.');
+
+                // Reset form
+                document.getElementById('contactForm').reset();
+
+                // Repopulate name and email from current user
+                const user = AuthHelper.getUser();
+                if (user) {
+                    document.getElementById('contactName').value = user.name || '';
+                    document.getElementById('contactEmail').value = user.email || '';
+                }
+            } catch (error) {
+                console.error('Contact form error:', error);
+                alert('❌ Failed to send message. Please try again.');
+            } finally {
+                // Restore button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+
+        // Submit contact form to Google Sheets
+        async function submitContactForm(data) {
+            console.log('submitContactForm called with:', data);
+
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFQrWbc2yohsGD7bd3t0H3-rVfdzvQU_lpQh3R2BXS3Uxs5I2i2XUvg6AVdvCncg/exec';
+
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            console.log('Data sent to Google Sheets');
+            // With no-cors mode, we can't read the response, so assume success
+            return { success: true };
+        }
+
+        // Reset contact form
+        function resetContactForm() {
+            document.getElementById('contactForm').reset();
+            // Repopulate name and email from current user
+            const user = AuthHelper.getUser();
+            if (user) {
+                document.getElementById('contactName').value = user.name || '';
+                document.getElementById('contactEmail').value = user.email || '';
+            }
+        }
+
+        // Logout Function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear any stored tokens/data
+                // localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // API Integration Functions (to be implemented with backend)
+        async function fetchUserProfile() {
+            // const response = await fetch('/api/user/profile', {
+            //     headers: { 'Authorization': 'Bearer ' + localStorage.getItem('authToken') }
+            // });
+            // const data = await response.json();
+            // userData = data;
+            // loadUserProfile();
+        }
+
+        async function updateUserProfile(data) {
+            // const response = await fetch('/api/user/profile', {
+            //     method: 'PUT',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+            //     },
+            //     body: JSON.stringify(data)
+            // });
+            // return await response.json();
+        }
+    </script>
+    <script src="js/api-config.js"></script>
+    <script src="js/profile.js"></script>
+    <script>
+        // Force page refresh to prevent caching old user data
+        if (sessionStorage.getItem('lastUser') !== AuthHelper.getUser()?.email) {
+            sessionStorage.setItem('lastUser', AuthHelper.getUser()?.email || '');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget & Savings - BudgetBuddy</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #F9FAFB;
+            color: #111827;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR NAVIGATION */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-icon {
+            font-size: 36px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #10B981, #3B82F6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .user-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            opacity: 0.8;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: white;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            padding: 14px 16px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 32px;
+            max-width: calc(100vw - 280px);
+        }
+
+        .mobile-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu-btn {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: #6B7280;
+        }
+
+        /* BUDGET SECTION */
+        .budget-section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .edit-budget-btn {
+            padding: 10px 20px;
+            background: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .edit-budget-btn:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* BUDGET ALERT */
+        .budget-alert {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+        }
+
+        .budget-alert.safe {
+            background: #D1FAE5;
+            border-color: #10B981;
+            color: #065F46;
+        }
+
+        .budget-alert.warning {
+            background: #FEF3C7;
+            border-color: #F59E0B;
+            color: #92400E;
+        }
+
+        .budget-alert.danger {
+            background: #FEE2E2;
+            border-color: #EF4444;
+            color: #991B1B;
+        }
+
+        .alert-icon {
+            font-size: 36px;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .alert-content p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* BUDGET STATS */
+        .budget-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .budget-stat {
+            padding: 20px;
+            background: #F9FAFB;
+            border-radius: 12px;
+            border: 2px solid #E5E7EB;
+        }
+
+        .budget-stat-label {
+            font-size: 14px;
+            color: #6B7280;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .budget-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .budget-stat-value.positive {
+            color: #10B981;
+        }
+
+        .budget-stat-value.negative {
+            color: #EF4444;
+        }
+
+        /* BUDGET CHART */
+        .budget-chart-container {
+            background: #F9FAFB;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* BUDGET PROGRESS BAR */
+        .budget-progress-container {
+            margin-bottom: 24px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .progress-percentage {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .progress-percentage.safe {
+            color: #10B981;
+        }
+
+        .progress-percentage.warning {
+            color: #F59E0B;
+        }
+
+        .progress-percentage.danger {
+            color: #EF4444;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 24px;
+            background: #E5E7EB;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease, background 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .progress-bar.safe {
+            background: linear-gradient(90deg, #10B981, #059669);
+        }
+
+        .progress-bar.warning {
+            background: linear-gradient(90deg, #F59E0B, #D97706);
+        }
+
+        .progress-bar.danger {
+            background: linear-gradient(90deg, #EF4444, #DC2626);
+        }
+
+        /* SAVINGS SECTION */
+        .savings-section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-goal-btn {
+            padding: 10px 20px;
+            background: #10B981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .add-goal-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* SAVINGS GOALS */
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .goal-card {
+            background: #F9FAFB;
+            border-radius: 16px;
+            padding: 24px;
+            border: 2px solid #E5E7EB;
+            transition: all 0.2s;
+        }
+
+        .goal-card:hover {
+            border-color: #3B82F6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .goal-card.completed {
+            background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+            border-color: #10B981;
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .goal-info h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .goal-info p {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .goal-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .goal-action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .add-savings-btn {
+            background: #10B981;
+            color: white;
+        }
+
+        .add-savings-btn:hover {
+            background: #059669;
+        }
+
+        .edit-goal-btn {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .edit-goal-btn:hover {
+            background: #2563EB;
+        }
+
+        .delete-goal-btn {
+            background: #EF4444;
+            color: white;
+        }
+
+        .delete-goal-btn:hover {
+            background: #DC2626;
+        }
+
+        .goal-amounts {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .goal-amount {
+            text-align: center;
+        }
+
+        .goal-amount-label {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 4px;
+        }
+
+        .goal-amount-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .goal-progress-container {
+            margin-bottom: 16px;
+        }
+
+        .goal-progress-bar-container {
+            width: 100%;
+            height: 20px;
+            background: #E5E7EB;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .goal-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .goal-progress-bar.completed {
+            background: linear-gradient(90deg, #10B981, #059669);
+        }
+
+        .goal-progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .goal-progress-percentage {
+            font-weight: 600;
+            color: #3B82F6;
+        }
+
+        .goal-progress-percentage.completed {
+            color: #10B981;
+        }
+
+        .goal-remaining {
+            color: #6B7280;
+        }
+
+        .goal-status {
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .goal-status.in-progress {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .goal-status.completed {
+            background: #10B981;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 72px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: #4B5563;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: #9CA3AF;
+            margin-bottom: 24px;
+        }
+
+        /* MODALS */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #F3F4F6;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #F3F4F6;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #E5E7EB;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #111827;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input[type="number"] {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .input-prefix {
+            position: relative;
+        }
+
+        .input-prefix .form-input {
+            padding-left: 36px;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            font-weight: 600;
+            color: #6B7280;
+            pointer-events: none;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-primary {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            background: #2563EB;
+        }
+
+        .modal-btn-success {
+            background: #10B981;
+            color: white;
+        }
+
+        .modal-btn-success:hover {
+            background: #059669;
+        }
+
+        .modal-btn-secondary {
+            background: #F3F4F6;
+            color: #374151;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #E5E7EB;
+        }
+
+        /* CONFIRMATION DIALOG */
+        .confirm-dialog {
+            text-align: center;
+        }
+
+        .confirm-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .confirm-message {
+            margin-bottom: 24px;
+        }
+
+        .confirm-message h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .confirm-message p {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1024px) {
+            .budget-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .goals-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-visible {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                max-width: 100vw;
+                padding: 20px;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .budget-section,
+            .savings-section {
+                padding: 20px;
+            }
+
+            .budget-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .goals-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 24px;
+            }
+        }
+
+        /* OVERLAY FOR MOBILE SIDEBAR */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">💰</div>
+                <div class="logo-text">BudgetBuddy</div>
+            </div>
+
+            <div class="user-profile">
+                <div class="user-avatar">U</div>
+                <div class="user-info">
+                    <h3>User</h3>
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="nav-icon">🏠</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="add-expense.html" class="nav-item">
+                    <span class="nav-icon">➕</span>
+                    <span>Add Expense</span>
+                </a>
+                <a href="view-expenses.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>View Expenses</span>
+                </a>
+                <a href="budget-savings.html" class="nav-item active">
+                    <span class="nav-icon">💎</span>
+                    <span>Budget & Savings</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span>Profile</span>
+                </a>
+            </nav>
+
+            <button class="logout-btn" onclick="logout()">
+                <span>🚪</span>
+                <span>Logout</span>
+            </button>
+        </nav>
+
+        <!-- OVERLAY -->
+        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- MOBILE HEADER -->
+            <div class="mobile-header">
+                <div class="mobile-menu-btn" onclick="toggleSidebar()">☰</div>
+                <div class="logo-text">BudgetBuddy</div>
+            </div>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+                <h1>💎 Budget & Savings</h1>
+                <p>Manage your monthly budget and track your savings goals</p>
+            </div>
+
+            <!-- BUDGET SECTION -->
+            <div class="budget-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>📊</span>
+                        <span>Monthly Budget</span>
+                    </h2>
+                    <button class="edit-budget-btn" onclick="openBudgetModal()">
+                        <span>✏️</span>
+                        <span>Edit Budget</span>
+                    </button>
+                </div>
+
+                <!-- BUDGET ALERT -->
+                <div class="budget-alert safe" id="budgetAlert">
+                    <div class="alert-icon">⏳</div>
+                    <div class="alert-content">
+                        <h3>Loading budget...</h3>
+                        <p>Fetching your budget information...</p>
+                    </div>
+                </div>
+
+                <!-- BUDGET STATS -->
+                <div class="budget-stats">
+                    <div class="budget-stat">
+                        <div class="budget-stat-label">Monthly Budget</div>
+                        <div class="budget-stat-value" id="budgetTotal">-</div>
+                    </div>
+                    <div class="budget-stat">
+                        <div class="budget-stat-label">Total Spent</div>
+                        <div class="budget-stat-value negative" id="budgetSpent">-</div>
+                    </div>
+                    <div class="budget-stat">
+                        <div class="budget-stat-label">Remaining</div>
+                        <div class="budget-stat-value positive" id="budgetRemaining">-</div>
+                    </div>
+                </div>
+
+                <!-- BUDGET PROGRESS BAR -->
+                <div class="budget-progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">Budget Usage</span>
+                        <span class="progress-percentage safe" id="budgetPercentage">-</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar safe" id="budgetProgressBar" style="width: 0%">
+                            -
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BUDGET CHART -->
+                <div class="budget-chart-container">
+                    <div class="chart-header">
+                        <span>📈</span>
+                        <span>Budget vs Actual Spending</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="budgetChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SAVINGS SECTION -->
+            <div class="savings-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>🎯</span>
+                        <span>Savings Goals</span>
+                    </h2>
+                    <button class="add-goal-btn" onclick="openAddGoalModal()">
+                        <span>➕</span>
+                        <span>Add New Goal</span>
+                    </button>
+                </div>
+
+                <!-- GOALS GRID -->
+                <div class="goals-grid" id="goalsGrid">
+                    <!-- Goal cards will be dynamically inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- EDIT BUDGET MODAL -->
+    <div class="modal" id="budgetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💰 Edit Monthly Budget</h2>
+                <button class="modal-close" onclick="closeBudgetModal()">✕</button>
+            </div>
+            <form class="modal-form" id="budgetForm">
+                <div class="form-group">
+                    <label class="form-label">Monthly Budget Amount</label>
+                    <div class="input-prefix">
+                        <span class="currency-symbol">₹</span>
+                        <input type="number" class="form-input" id="monthlyBudget" placeholder="50000" required min="1">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="closeBudgetModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="modal-btn modal-btn-primary">
+                        Save Budget
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADD/EDIT GOAL MODAL -->
+    <div class="modal" id="goalModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="goalModalTitle">🎯 Add Savings Goal</h2>
+                <button class="modal-close" onclick="closeGoalModal()">✕</button>
+            </div>
+            <form class="modal-form" id="goalForm">
+                <div class="form-group">
+                    <label class="form-label">Goal Name</label>
+                    <input type="text" class="form-input" id="goalName" placeholder="e.g., New Laptop" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Target Amount</label>
+                    <div class="input-prefix">
+                        <span class="currency-symbol">₹</span>
+                        <input type="number" class="form-input" id="targetAmount" placeholder="60000" required min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Target Date</label>
+                    <input type="date" class="form-input" id="goalDeadline" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Goal Icon (Emoji)</label>
+                    <input type="text" class="form-input" id="goalIcon" placeholder="💻" maxlength="2">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="closeGoalModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="modal-btn modal-btn-success">
+                        Save Goal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADD SAVINGS MODAL -->
+    <div class="modal" id="addSavingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💵 Add Savings</h2>
+                <button class="modal-close" onclick="closeAddSavingsModal()">✕</button>
+            </div>
+            <form class="modal-form" id="addSavingsForm">
+                <div class="form-group">
+                    <label class="form-label">Amount to Add</label>
+                    <div class="input-prefix">
+                        <span class="currency-symbol">₹</span>
+                        <input type="number" class="form-input" id="savingsAmount" placeholder="5000" required min="1"
+                            step="100">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="closeAddSavingsModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="modal-btn modal-btn-success">
+                        Add Savings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content confirm-dialog">
+            <div class="confirm-icon">⚠️</div>
+            <div class="confirm-message">
+                <h3>Delete Savings Goal?</h3>
+                <p>This action cannot be undone. Are you sure you want to delete this savings goal?</p>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" onclick="closeDeleteModal()">
+                    Cancel
+                </button>
+                <button class="modal-btn modal-btn-primary" onclick="confirmDelete()" style="background: #EF4444;">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // All functionality has been moved to js/budget-savings.js
+        // User authentication and data loading is handled by the external script
+    </script>
+    <script src="js/api-config.js"></script>
+    <script src="js/budget-savings.js"></script>
+    <script>
+        // Force page refresh to prevent caching old user data
+        if (sessionStorage.getItem('lastUser') !== AuthHelper.getUser()?.email) {
+            sessionStorage.setItem('lastUser', AuthHelper.getUser()?.email || '');
+        }
+    </script>
+</body>
+
+</html>

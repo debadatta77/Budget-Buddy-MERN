@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Expenses - BudgetBuddy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #F9FAFB;
+            color: #111827;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR NAVIGATION */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-icon {
+            font-size: 36px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #10B981, #3B82F6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .user-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            opacity: 0.8;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: white;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            padding: 14px 16px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 32px;
+            max-width: calc(100vw - 280px);
+        }
+
+        .mobile-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu-btn {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: #6B7280;
+        }
+
+        /* FILTERS AND SEARCH */
+        .filters-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filters-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clear-filters-btn {
+            padding: 8px 16px;
+            background: #F3F4F6;
+            color: #374151;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clear-filters-btn:hover {
+            background: #E5E7EB;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .filter-input,
+        .filter-select {
+            padding: 10px 12px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #111827;
+            transition: all 0.2s;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 36px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #9CA3AF;
+        }
+
+        .search-box .filter-input {
+            padding-left: 40px;
+        }
+
+        /* SORTING AND VIEW OPTIONS */
+        .view-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .sort-options {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .sort-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .sort-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #374151;
+        }
+
+        .sort-btn:hover {
+            border-color: #3B82F6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .sort-btn.active {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 4px;
+            border-radius: 8px;
+            border: 2px solid #E5E7EB;
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #374151;
+        }
+
+        .view-btn:hover {
+            background: #F3F4F6;
+        }
+
+        .view-btn.active {
+            background: #3B82F6;
+            color: white;
+        }
+
+        /* EXPENSES LIST */
+        .expenses-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .expenses-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #F3F4F6;
+        }
+
+        .expenses-count {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .expenses-count strong {
+            color: #111827;
+            font-weight: 700;
+        }
+
+        .add-expense-btn {
+            padding: 10px 20px;
+            background: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .add-expense-btn:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* DATE GROUPS */
+        .date-group {
+            margin-bottom: 24px;
+        }
+
+        .date-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #F9FAFB;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .date-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .date-total {
+            font-size: 14px;
+            color: #EF4444;
+            font-weight: 700;
+            margin-left: auto;
+        }
+
+        /* EXPENSE ITEMS */
+        .expense-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .expense-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: #F9FAFB;
+            border-radius: 12px;
+            border-left: 4px solid;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .expense-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateX(4px);
+        }
+
+        .expense-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .expense-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .expense-details {
+            flex: 1;
+        }
+
+        .expense-details h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #111827;
+        }
+
+        .expense-details p {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .expense-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .expense-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #EF4444;
+            text-align: right;
+        }
+
+        .expense-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .edit-btn {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+        }
+
+        .edit-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+
+        .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* CATEGORY COLORS */
+        .food {
+            border-left-color: #FF6B6B;
+        }
+
+        .food .expense-icon {
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .transport {
+            border-left-color: #4ECDC4;
+        }
+
+        .transport .expense-icon {
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .shopping {
+            border-left-color: #A78BFA;
+        }
+
+        .shopping .expense-icon {
+            background: rgba(167, 139, 250, 0.1);
+        }
+
+        .utilities {
+            border-left-color: #FCD34D;
+        }
+
+        .utilities .expense-icon {
+            background: rgba(252, 211, 77, 0.1);
+        }
+
+        .healthcare {
+            border-left-color: #EF4444;
+        }
+
+        .healthcare .expense-icon {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .entertainment {
+            border-left-color: #F472B6;
+        }
+
+        .entertainment .expense-icon {
+            background: rgba(244, 114, 182, 0.1);
+        }
+
+        .education {
+            border-left-color: #10B981;
+        }
+
+        .education .expense-icon {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .rent {
+            border-left-color: #8B5CF6;
+        }
+
+        .rent .expense-icon {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .other {
+            border-left-color: #6B7280;
+        }
+
+        .other .expense-icon {
+            background: rgba(107, 114, 128, 0.1);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: #4B5563;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: #9CA3AF;
+            margin-bottom: 24px;
+        }
+
+        /* EDIT MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #F3F4F6;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #F3F4F6;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #E5E7EB;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 10px 12px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #111827;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-primary {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            background: #2563EB;
+        }
+
+        .modal-btn-secondary {
+            background: #F3F4F6;
+            color: #374151;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #E5E7EB;
+        }
+
+        /* CONFIRMATION DIALOG */
+        .confirm-dialog {
+            max-width: 400px;
+        }
+
+        .confirm-dialog .modal-header {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .confirm-icon {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .confirm-message {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .confirm-message h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .confirm-message p {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-visible {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+                max-width: 100vw;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .view-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .sort-options {
+                flex-wrap: wrap;
+            }
+
+            .expense-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .expense-right {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 12px;
+                padding-top: 12px;
+                border-top: 1px solid #E5E7EB;
+            }
+        }
+
+        /* OVERLAY FOR MOBILE SIDEBAR */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">💰</div>
+                <div class="logo-text">BudgetBuddy</div>
+            </div>
+
+            <div class="user-profile">
+                <div class="user-avatar">U</div>
+                <div class="user-info">
+                    <h3>User</h3>
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="nav-icon">🏠</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="add-expense.html" class="nav-item">
+                    <span class="nav-icon">➕</span>
+                    <span>Add Expense</span>
+                </a>
+                <a href="view-expenses.html" class="nav-item active">
+                    <span class="nav-icon">📋</span>
+                    <span>View Expenses</span>
+                </a>
+                <a href="budget-savings.html" class="nav-item">
+                    <span class="nav-icon">💰</span>
+                    <span>Budget & Savings</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span>Profile Info</span>
+                </a>
+            </div>
+
+            <button class="logout-btn" onclick="logout()">
+                <span class="nav-icon">🚪</span>
+                <span>Logout</span>
+            </button>
+        </nav>
+
+        <!-- OVERLAY -->
+        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- MOBILE HEADER -->
+            <div class="mobile-header">
+                <div class="mobile-menu-btn" onclick="toggleSidebar()">☰</div>
+                <div class="logo-text">💰 BudgetBuddy</div>
+                <div style="width: 32px;"></div>
+            </div>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+                <h1>All Expenses 📋</h1>
+                <p>View, search, and manage all your expenses</p>
+            </div>
+
+            <!-- FILTERS SECTION -->
+            <div class="filters-section">
+                <div class="filters-header">
+                    <h3 class="filters-title">
+                        <span>🔍</span>
+                        <span>Filters & Search</span>
+                    </h3>
+                    <button class="clear-filters-btn" onclick="clearFilters()">Clear All</button>
+                </div>
+
+                <div class="filters-grid">
+                    <!-- SEARCH -->
+                    <div class="filter-group">
+                        <label class="filter-label">Search Description</label>
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="filter-input" id="searchInput" placeholder="Search expenses..."
+                                oninput="applyFilters()">
+                        </div>
+                    </div>
+
+                    <!-- CATEGORY FILTER -->
+                    <div class="filter-group">
+                        <label class="filter-label">Category</label>
+                        <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
+                            <option value="">All Categories</option>
+                            <option value="Food & Dining">🍔 Food & Dining</option>
+                            <option value="Transportation">🚗 Transportation</option>
+                            <option value="Shopping">🛒 Shopping</option>
+                            <option value="Utilities">💡 Utilities</option>
+                            <option value="Healthcare">🏥 Healthcare</option>
+                            <option value="Entertainment">🎬 Entertainment</option>
+                            <option value="Education">📚 Education</option>
+                            <option value="Rent">🏠 Rent</option>
+                            <option value="Other">💳 Other</option>
+                        </select>
+                    </div>
+
+                    <!-- DATE FROM -->
+                    <div class="filter-group">
+                        <label class="filter-label">From Date</label>
+                        <input type="date" class="filter-input" id="dateFrom" onchange="applyFilters()">
+                    </div>
+
+                    <!-- DATE TO -->
+                    <div class="filter-group">
+                        <label class="filter-label">To Date</label>
+                        <input type="date" class="filter-input" id="dateTo" onchange="applyFilters()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW CONTROLS -->
+            <div class="view-controls">
+                <div class="sort-options">
+                    <span class="sort-label">Sort by:</span>
+                    <button class="sort-btn active" data-sort="date-desc" onclick="changeSorting(this)">Recent
+                        First</button>
+                    <button class="sort-btn" data-sort="date-asc" onclick="changeSorting(this)">Oldest First</button>
+                    <button class="sort-btn" data-sort="amount-desc" onclick="changeSorting(this)">Highest
+                        Amount</button>
+                    <button class="sort-btn" data-sort="amount-asc" onclick="changeSorting(this)">Lowest Amount</button>
+                </div>
+
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="date" onclick="changeView(this)">📅 Date View</button>
+                    <button class="view-btn" data-view="category" onclick="changeView(this)">🗂️ Category View</button>
+                </div>
+            </div>
+
+            <!-- EXPENSES SECTION -->
+            <div class="expenses-section">
+                <div class="expenses-header">
+                    <div class="expenses-count">
+                        Showing <strong id="expenseCount">0</strong> expenses
+                    </div>
+                    <button class="add-expense-btn" onclick="goToAddExpense()">
+                        <span>➕</span>
+                        <span>Add Expense</span>
+                    </button>
+                </div>
+
+                <!-- EXPENSES LIST -->
+                <div class="expenses-list"></div>
+
+                <!-- EMPTY STATE (hidden by default, shown when no expenses) -->
+                <!-- <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3>No expenses found</h3>
+                    <p>Try adjusting your filters or add your first expense</p>
+                    <button class="add-expense-btn" onclick="goToAddExpense()">
+                        <span>➕</span>
+                        <span>Add Expense</span>
+                    </button>
+                </div> -->
+            </div>
+        </main>
+    </div>
+
+    <!-- EDIT EXPENSE MODAL -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Expense</h2>
+                <button class="modal-close" onclick="closeEditModal()">✕</button>
+            </div>
+
+            <form class="modal-form" id="editForm" onsubmit="handleEditSubmit(event)">
+                <div class="form-group">
+                    <label class="form-label">Amount (₹)</label>
+                    <input type="number" class="form-input" id="editAmount" required min="0" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="editCategory" required>
+                        <option value="Food & Dining">🍔 Food & Dining</option>
+                        <option value="Transportation">🚗 Transportation</option>
+                        <option value="Shopping">🛒 Shopping</option>
+                        <option value="Utilities">💡 Utilities</option>
+                        <option value="Healthcare">🏥 Healthcare</option>
+                        <option value="Entertainment">🎬 Entertainment</option>
+                        <option value="Education">📚 Education</option>
+                        <option value="Rent">🏠 Rent</option>
+                        <option value="Other">💳 Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="editDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="editDescription"
+                        placeholder="Add notes about this expense"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-secondary"
+                        onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content confirm-dialog">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeDeleteModal()">✕</button>
+            </div>
+
+            <div class="confirm-icon">🗑️</div>
+
+            <div class="confirm-message">
+                <h3>Delete Expense?</h3>
+                <p>Are you sure you want to delete this expense? This action cannot be undone.</p>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="modal-btn modal-btn-primary" style="background: #EF4444;"
+                    onclick="deleteExpense()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Logic is handled in js/view-expenses.js
+    </script>
+    <script src="js/api-config.js"></script>
+    <script src="js/view-expenses.js"></script>
+    <script>
+        // Force page refresh to prevent caching old user data
+        if (sessionStorage.getItem('lastUser') !== AuthHelper.getUser()?.email) {
+            sessionStorage.setItem('lastUser', AuthHelper.getUser()?.email || '');
+        }
+    </script>
+</body>
+
+</html>

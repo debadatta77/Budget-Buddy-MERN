@@ -1,6 +1,17 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User.model");
 
+const getAdminEmails = () => {
+  return (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+};
+
+const isConfiguredAdmin = (email = "") => {
+  return getAdminEmails().includes(String(email).toLowerCase());
+};
+
 // Protect routes - Verify JWT token
 exports.protect = async (req, res, next) => {
   try {
@@ -59,6 +70,21 @@ exports.generateToken = (userId) => {
   });
 };
 
+// Restrict route access to admins
+exports.adminOnly = (req, res, next) => {
+  const isAdmin =
+    req.user?.role === "admin" || isConfiguredAdmin(req.user?.email);
+
+  if (!isAdmin) {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied. Admin privileges required.",
+    });
+  }
+
+  next();
+};
+
 // Send token response
 exports.sendTokenResponse = (user, statusCode, res) => {
   // Create token
@@ -76,6 +102,7 @@ exports.sendTokenResponse = (user, statusCode, res) => {
       gender: user.gender,
       currency: user.currency,
       monthlyIncome: user.monthlyIncome,
+      role: user.role,
       createdAt: user.createdAt,
     },
   });

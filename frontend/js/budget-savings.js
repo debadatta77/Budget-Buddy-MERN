@@ -22,6 +22,25 @@ let currentGoalId = null;
 let currentEditMode = "add";
 let budgetChart = null;
 
+function handleAuthOrApiError(error, fallbackMessage) {
+  const message = String(error?.message || fallbackMessage || "Request failed");
+  const isAuthError =
+    message.toLowerCase().includes("not authorized") ||
+    message.toLowerCase().includes("token is invalid") ||
+    message.toLowerCase().includes("token is invalid or expired") ||
+    message.toLowerCase().includes("please login") ||
+    message.includes("401");
+
+  if (isAuthError) {
+    AuthHelper.removeToken();
+    alert("Session expired. Please login again.");
+    window.location.href = "index.html";
+    return;
+  }
+
+  Utils.showError(message || fallbackMessage || "Something went wrong");
+}
+
 // Fetch budget data
 async function fetchBudgetData() {
   try {
@@ -37,6 +56,7 @@ async function fetchBudgetData() {
     }
   } catch (error) {
     console.error("Error fetching budget:", error);
+    handleAuthOrApiError(error, "Failed to load budget data");
   }
 }
 
@@ -188,6 +208,7 @@ async function fetchSavingsGoals() {
     }
   } catch (error) {
     console.error("Error fetching goals:", error);
+    handleAuthOrApiError(error, "Failed to load savings goals");
   }
 }
 

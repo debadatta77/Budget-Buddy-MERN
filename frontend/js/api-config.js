@@ -1,7 +1,7 @@
 // API Configuration
-// Dynamically match frontend host (127.0.0.1 vs localhost)
-const API_HOST =
-  window.location.hostname === "127.0.0.1" ? "127.0.0.1" : "localhost";
+// Resolve API host from page host; when opened via file:// use 127.0.0.1.
+const PAGE_HOST = window.location.hostname;
+const API_HOST = PAGE_HOST || "127.0.0.1";
 const API_CONFIG = {
   BASE_URL: `http://${API_HOST}:8000/api`,
   ENDPOINTS: {
@@ -31,6 +31,9 @@ const API_CONFIG = {
     // Dashboard
     DASHBOARD: "/dashboard",
     DASHBOARD_STATS: "/dashboard/stats",
+
+    // Admin
+    ADMIN_ANALYTICS: "/admin/analytics",
   },
 };
 
@@ -82,9 +85,11 @@ const AuthHelper = {
 const API = {
   // Generic GET request
   async get(endpoint, params = {}) {
+    let url = `${API_CONFIG.BASE_URL}${endpoint}`;
+
     try {
       const queryString = new URLSearchParams(params).toString();
-      const url = `${API_CONFIG.BASE_URL}${endpoint}${queryString ? "?" + queryString : ""}`;
+      url = `${API_CONFIG.BASE_URL}${endpoint}${queryString ? "?" + queryString : ""}`;
 
       const response = await fetch(url, {
         method: "GET",
@@ -379,6 +384,13 @@ const DashboardAPI = {
   },
 };
 
+// Admin API Functions
+const AdminAPI = {
+  async getAnalytics() {
+    return await API.get(API_CONFIG.ENDPOINTS.ADMIN_ANALYTICS);
+  },
+};
+
 // Utility Functions
 const Utils = {
   // Show loading spinner
@@ -420,5 +432,10 @@ const Utils = {
       return false;
     }
     return true;
+  },
+
+  isAdmin() {
+    const user = AuthHelper.getUser();
+    return user?.role === "admin";
   },
 };

@@ -36,13 +36,30 @@ exports.getDashboardData = async (req, res) => {
     });
 
     if (!budget) {
-      budget = await Budget.create({
-        user: req.user.id,
-        monthlyBudget: 0,
-        spent: totalExpenses,
-        month: currentMonth,
-        year: currentYear,
-      });
+      try {
+        budget = await Budget.create({
+          user: req.user.id,
+          monthlyBudget: 0,
+          spent: totalExpenses,
+          month: currentMonth,
+          year: currentYear,
+        });
+      } catch (createError) {
+        if (createError?.code === 11000) {
+          budget = await Budget.findOneAndUpdate(
+            { user: req.user.id },
+            {
+              monthlyBudget: 0,
+              spent: totalExpenses,
+              month: currentMonth,
+              year: currentYear,
+            },
+            { new: true, upsert: true, setDefaultsOnInsert: true },
+          );
+        } else {
+          throw createError;
+        }
+      }
     }
 
     // Get savings goals

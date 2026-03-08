@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Analytics - BudgetBuddy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f3f4f6;
+            color: #111827;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #1d4ed8 0%, #0f766e 100%);
+            color: #fff;
+            padding: 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 28px;
+        }
+
+        .user-box {
+            background: rgba(255, 255, 255, 0.14);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 24px;
+        }
+
+        .user-box h3 {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .user-box p {
+            font-size: 12px;
+            opacity: 0.9;
+            word-break: break-word;
+        }
+
+        .nav-item {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .main {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            padding: 28px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #4b5563;
+            margin-bottom: 24px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .card .label {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .card .value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .panel {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .panel h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        th {
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .error-box {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .key-access {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .key-access input {
+            flex: 1;
+            min-width: 240px;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .key-access button {
+            border: none;
+            background: #0f766e;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .key-note {
+            width: 100%;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .logout-btn {
+            margin-top: 18px;
+            width: 100%;
+            border: none;
+            background: rgba(239, 68, 68, 0.25);
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .layout {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="logo">BudgetBuddy Admin</div>
+
+            <div class="user-box">
+                <h3 id="adminName">Admin</h3>
+                <p id="adminEmail">Loading...</p>
+            </div>
+
+            <a href="dashboard.html" class="nav-item">Dashboard</a>
+            <a href="add-expense.html" class="nav-item">Add Expense</a>
+            <a href="view-expenses.html" class="nav-item">View Expenses</a>
+            <a href="budget-savings.html" class="nav-item">Budget & Savings</a>
+            <a href="profile.html" class="nav-item">Profile</a>
+            <a href="admin.html" class="nav-item active">Admin Analytics</a>
+
+            <button class="logout-btn" onclick="lockPage()">Lock Page</button>
+        </aside>
+
+        <main class="main">
+            <div class="header">
+                <h1>Admin Analytics</h1>
+                <p>Track users, spending, and highest spending categories across the platform.</p>
+            </div>
+
+            <div id="errorBox" class="error-box"></div>
+
+            <section class="key-access">
+                <input type="password" id="adminKeyInput" placeholder="Enter Admin Access Key" autocomplete="off">
+                <button onclick="unlockAndLoad()">Unlock Data</button>
+                <div class="key-note">This page does not require user login. It requires your backend
+                    `ADMIN_ACCESS_KEY`.</div>
+            </section>
+
+            <section class="stats-grid">
+                <div class="card">
+                    <div class="label">Total Users</div>
+                    <div class="value" id="totalUsers">0</div>
+                </div>
+                <div class="card">
+                    <div class="label">Active Users</div>
+                    <div class="value" id="activeUsers">0</div>
+                </div>
+                <div class="card">
+                    <div class="label">Avg Spending / User</div>
+                    <div class="value" id="avgSpending">₹0</div>
+                </div>
+                <div class="card">
+                    <div class="label">Total Spending</div>
+                    <div class="value" id="totalSpending">₹0</div>
+                </div>
+            </section>
+
+            <section class="two-col">
+                <div class="panel">
+                    <h2>Highest Spending Categories</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Total Spent</th>
+                                <th>Transactions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoryTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="panel">
+                    <h2>Top Spenders</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Total Spent</th>
+                                <th>Transactions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="spenderTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/api-config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>

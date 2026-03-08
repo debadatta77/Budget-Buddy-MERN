@@ -47,15 +47,33 @@ exports.setBudget = async (req, res) => {
       }
       await budget.save();
     } else {
-      // Create new budget
-      budget = await Budget.create({
-        user: req.user.id,
-        monthlyBudget,
-        spent,
-        month: budgetMonth,
-        year: budgetYear,
-        categoryBudgets: categoryBudgets || [],
-      });
+      // Create new budget. If legacy unique index on `user` exists, fall back to update.
+      try {
+        budget = await Budget.create({
+          user: req.user.id,
+          monthlyBudget,
+          spent,
+          month: budgetMonth,
+          year: budgetYear,
+          categoryBudgets: categoryBudgets || [],
+        });
+      } catch (createError) {
+        if (createError?.code === 11000) {
+          budget = await Budget.findOneAndUpdate(
+            { user: req.user.id },
+            {
+              monthlyBudget,
+              spent,
+              month: budgetMonth,
+              year: budgetYear,
+              categoryBudgets: categoryBudgets || [],
+            },
+            { new: true, upsert: true, setDefaultsOnInsert: true },
+          );
+        } else {
+          throw createError;
+        }
+      }
     }
 
     successResponse(res, 200, budget, "Budget set successfully");
@@ -96,13 +114,25 @@ exports.getBudget = async (req, res) => {
 
       const spent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-      budget = await Budget.create({
-        user: req.user.id,
-        monthlyBudget: 0,
-        spent,
-        month: budgetMonth,
-        year: budgetYear,
-      });
+      try {
+        budget = await Budget.create({
+          user: req.user.id,
+          monthlyBudget: 0,
+          spent,
+          month: budgetMonth,
+          year: budgetYear,
+        });
+      } catch (createError) {
+        if (createError?.code === 11000) {
+          budget = await Budget.findOneAndUpdate(
+            { user: req.user.id },
+            { monthlyBudget: 0, spent, month: budgetMonth, year: budgetYear },
+            { new: true, upsert: true, setDefaultsOnInsert: true },
+          );
+        } else {
+          throw createError;
+        }
+      }
     }
 
     // Calculate budget status

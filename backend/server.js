@@ -13,20 +13,13 @@ const budgetRoutes = require("./routes/budget.routes");
 const savingsRoutes = require("./routes/savings.routes");
 const profileRoutes = require("./routes/profile.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
+const adminRoutes = require("./routes/admin.routes");
 
 // Initialize Express app
 const app = express();
 
 // Security middleware
 app.use(helmet());
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: "Too many requests from this IP, please try again later.",
-});
-app.use("/api/", limiter);
 
 // CORS configuration (allow common local dev origins)
 const allowedOrigins = new Set(
@@ -51,6 +44,15 @@ app.use(
     credentials: true,
   }),
 );
+
+// Rate limiting (looser in development; ignore preflight)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.NODE_ENV === "development" ? 1000 : 100,
+  message: "Too many requests from this IP, please try again later.",
+  skip: (req) => req.method === "OPTIONS",
+});
+app.use("/api/", limiter);
 
 // Body parser middleware
 app.use(express.json());
@@ -80,6 +82,7 @@ app.use("/api/budget", budgetRoutes);
 app.use("/api/savings", savingsRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Welcome route
 app.get("/", (req, res) => {

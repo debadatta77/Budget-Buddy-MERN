@@ -636,6 +636,10 @@
                     <span class="nav-icon">👤</span>
                     <span>Profile Info</span>
                 </a>
+                <a href="admin.html" class="nav-item" id="adminNavItem" style="display: none;">
+                    <span class="nav-icon">🛡️</span>
+                    <span>Admin Analytics</span>
+                </a>
             </div>
 
             <button class="logout-btn" onclick="logout()">
@@ -946,6 +950,11 @@
             document.querySelector('.user-info h3').textContent = currentUser.name || 'User';
             document.querySelector('.user-info p').textContent = currentUser.email || '';
             document.querySelector('.user-avatar').textContent = (currentUser.name || 'U').charAt(0).toUpperCase();
+
+            const adminNavItem = document.getElementById('adminNavItem');
+            if (adminNavItem && currentUser.role === 'admin') {
+                adminNavItem.style.display = 'flex';
+            }
         }
 
         // Initialize Charts
@@ -963,7 +972,22 @@
                 }
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
-                Utils.showError('Failed to load dashboard data');
+
+                const message = String(error?.message || 'Failed to load dashboard data');
+                const authError =
+                    message.toLowerCase().includes('not authorized') ||
+                    message.toLowerCase().includes('token is invalid') ||
+                    message.toLowerCase().includes('token is invalid or expired') ||
+                    message.toLowerCase().includes('please login');
+
+                if (authError) {
+                    AuthHelper.removeToken();
+                    alert('Session expired. Please login again.');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                Utils.showError(message);
             }
         }
 

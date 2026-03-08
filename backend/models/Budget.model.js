@@ -6,7 +6,6 @@ const budgetSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true,
     },
     monthlyBudget: {
       type: Number,
@@ -86,5 +85,6 @@ budgetSchema.pre("save", function (next) {
 
 // Index for faster queries
 budgetSchema.index({ user: 1, year: -1, month: -1 });
+budgetSchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
 
 module.exports = mongoose.model("Budget", budgetSchema);

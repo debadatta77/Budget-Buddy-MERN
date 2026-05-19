@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -11,10 +12,26 @@ const navItems = [
 
 export default function Layout() {
   const { user, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => setSidebarOpen((s) => !s);
+  const closeSidebar = () => setSidebarOpen(false);
 
   return (
     <div className="dashboard-container">
-      <aside className="sidebar">
+      {/* Mobile topbar shown only on small screens */}
+      <div className="mobile-topbar" role="banner">
+        <button
+          className="mobile-menu-btn"
+          aria-label="Toggle menu"
+          onClick={toggleSidebar}
+        >
+          ☰
+        </button>
+        <div className="mobile-title">BudgetBuddy</div>
+      </div>
+
+      <aside className={"sidebar" + (sidebarOpen ? " open" : "")}>
         <div className="logo-container">
           <span className="logo-icon">💰</span>
           <span className="logo-text">BudgetBuddy</span>
@@ -38,6 +55,7 @@ export default function Layout() {
               className={({ isActive }) =>
                 isActive ? "nav-item active" : "nav-item"
               }
+              onClick={closeSidebar}
             >
               <span className="nav-icon">{item.icon}</span>
               {item.label}
@@ -45,13 +63,23 @@ export default function Layout() {
           ))}
         </nav>
 
-        <button type="button" className="logout-btn" onClick={logout}>
+        <button
+          type="button"
+          className="logout-btn"
+          onClick={() => {
+            closeSidebar();
+            logout();
+          }}
+        >
           <span className="nav-icon">🚪</span>
           Logout
         </button>
       </aside>
 
-      <main className="main-content">
+      {/* Backdrop when sidebar open on mobile */}
+      {sidebarOpen && <div className="backdrop" onClick={closeSidebar} />}
+
+      <main className="main-content" onClick={closeSidebar}>
         <Outlet />
       </main>
     </div>

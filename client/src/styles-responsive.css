@@ -2,6 +2,117 @@
 
 /* Hide desktop sidebar by default on small screens; toggle with .open */
 @media (max-width: 768px) {
+
+    .dashboard-grid.two-column-grid,
+    .two-panel-grid,
+    .stats-grid,
+    .dashboard-mini-grid,
+    .goal-form-grid,
+    .expense-summary-grid,
+    .form-grid,
+    .summary-strip.compact,
+    .page-hero--savings,
+    .page-hero--expense,
+    .chart-row--bar {
+        grid-template-columns: 1fr !important;
+    }
+
+    .dashboard-grid.two-column-grid,
+    .two-panel-grid,
+    .stats-grid,
+    .dashboard-mini-grid,
+    .goal-form-grid,
+    .expense-summary-grid,
+    .form-grid,
+    .summary-strip.compact,
+    .page-hero--savings,
+    .page-hero--expense {
+        gap: 12px;
+    }
+
+    .page-header,
+    .page-card,
+    .section,
+    .form-container {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .page-header h1 {
+        font-size: 26px;
+        line-height: 1.1;
+    }
+
+    .page-hero--savings,
+    .page-hero--expense,
+    .profile-hero {
+        align-items: start;
+    }
+
+    .hero-stats-grid {
+        gap: 10px;
+    }
+
+    .hero-stat-chip,
+    .expense-metric-card,
+    .dashboard-mini-grid>div {
+        padding: 12px;
+    }
+
+    .goal-field--wide {
+        grid-column: auto;
+    }
+
+    .goal-card-header {
+        grid-template-columns: 44px minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .goal-progress-badge {
+        grid-column: 1 / -1;
+        justify-self: start;
+        margin-top: 4px;
+    }
+
+    .list-row,
+    .chart-row,
+    .summary-card-header,
+    .section-header,
+    .section-toolbar,
+    .category-topline,
+    .row-actions,
+    .row-meta {
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .list-row,
+    .chart-row,
+    .section-header,
+    .section-toolbar,
+    .summary-card-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .chart-row--bar {
+        gap: 10px;
+    }
+
+    .chart-value,
+    .row-meta span,
+    .category-topline span {
+        white-space: normal;
+    }
+
+    .input-icon-wrap input {
+        padding-left: 48px;
+    }
+
+    .main-content {
+        padding: 68px 14px 20px;
+    }
+
     .sidebar {
         transform: translateX(-100%);
         transition: transform 0.25s ease;

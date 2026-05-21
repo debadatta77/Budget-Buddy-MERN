@@ -54,6 +54,21 @@
     }
 
     .hero-stat-chip,
+
+    .hero-stat-chip strong,
+    .expense-metric-card strong,
+    .summary-strip strong,
+    .goal-card-header strong {
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .goal-card-header>div {
+        min-width: 0;
+    }
+
     .expense-metric-card,
     .dashboard-mini-grid>div {
         padding: 12px;
@@ -63,12 +78,25 @@
         grid-column: auto;
     }
 
+    gap: 12px;
+
     .goal-card-header {
         grid-template-columns: 44px minmax(0, 1fr);
         align-items: start;
     }
 
     .goal-progress-badge {
+
+        .goal-card-icon {
+            align-self: start;
+            flex-shrink: 0;
+        }
+
+        .goal-card-header strong {
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
         grid-column: 1 / -1;
         justify-self: start;
         margin-top: 4px;

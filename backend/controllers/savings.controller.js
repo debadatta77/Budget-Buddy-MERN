@@ -1,5 +1,9 @@
 const SavingsGoal = require("../models/SavingsGoal.model");
-const { errorResponse, successResponse } = require("../utils/helpers");
+const {
+  errorResponse,
+  successResponse,
+  normalizeMoneyAmount,
+} = require("../utils/helpers");
 
 // @desc    Create new savings goal
 // @route   POST /api/savings
@@ -8,8 +12,9 @@ exports.createGoal = async (req, res) => {
   try {
     const { name, targetAmount, deadline, category, icon, description } =
       req.body;
+    const normalizedTargetAmount = normalizeMoneyAmount(targetAmount);
 
-    if (!name || !targetAmount || !deadline) {
+    if (!name || !normalizedTargetAmount || !deadline) {
       return errorResponse(
         res,
         400,
@@ -17,14 +22,14 @@ exports.createGoal = async (req, res) => {
       );
     }
 
-    if (targetAmount <= 0) {
+    if (normalizedTargetAmount <= 0) {
       return errorResponse(res, 400, "Target amount must be greater than 0");
     }
 
     const goal = await SavingsGoal.create({
       user: req.user.id,
       name,
-      targetAmount,
+      targetAmount: normalizedTargetAmount,
       deadline,
       category,
       icon,
@@ -134,8 +139,9 @@ exports.updateGoal = async (req, res) => {
 exports.addSavings = async (req, res) => {
   try {
     const { amount, note } = req.body;
+    const normalizedAmount = normalizeMoneyAmount(amount);
 
-    if (!amount || amount <= 0) {
+    if (!normalizedAmount || normalizedAmount <= 0) {
       return errorResponse(res, 400, "Please provide a valid amount");
     }
 
@@ -151,13 +157,13 @@ exports.addSavings = async (req, res) => {
 
     // Add transaction
     goal.transactions.push({
-      amount,
+      amount: normalizedAmount,
       note,
       date: new Date(),
     });
 
     // Update saved amount
-    goal.savedAmount += amount;
+    goal.savedAmount += normalizedAmount;
 
     await goal.save();
 

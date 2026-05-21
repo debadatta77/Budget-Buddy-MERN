@@ -4,6 +4,7 @@ const {
   errorResponse,
   successResponse,
   getCurrentMonthRange,
+  normalizeMoneyAmount,
 } = require("../utils/helpers");
 
 // @desc    Create or update budget
@@ -12,8 +13,9 @@ const {
 exports.setBudget = async (req, res) => {
   try {
     const { monthlyBudget, month, year, categoryBudgets } = req.body;
+    const normalizedMonthlyBudget = normalizeMoneyAmount(monthlyBudget);
 
-    if (!monthlyBudget || monthlyBudget < 0) {
+    if (!normalizedMonthlyBudget || normalizedMonthlyBudget < 0) {
       return errorResponse(res, 400, "Please provide a valid monthly budget");
     }
 
@@ -40,7 +42,7 @@ exports.setBudget = async (req, res) => {
 
     if (budget) {
       // Update existing budget
-      budget.monthlyBudget = monthlyBudget;
+      budget.monthlyBudget = normalizedMonthlyBudget;
       budget.spent = spent;
       if (categoryBudgets) {
         budget.categoryBudgets = categoryBudgets;
@@ -51,7 +53,7 @@ exports.setBudget = async (req, res) => {
       try {
         budget = await Budget.create({
           user: req.user.id,
-          monthlyBudget,
+          monthlyBudget: normalizedMonthlyBudget,
           spent,
           month: budgetMonth,
           year: budgetYear,
@@ -62,7 +64,7 @@ exports.setBudget = async (req, res) => {
           budget = await Budget.findOneAndUpdate(
             { user: req.user.id },
             {
-              monthlyBudget,
+              monthlyBudget: normalizedMonthlyBudget,
               spent,
               month: budgetMonth,
               year: budgetYear,

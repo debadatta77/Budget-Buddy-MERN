@@ -1,14 +1,15 @@
-const Expense = require('../models/Expense.model');
-const Budget = require('../models/Budget.model');
-const { 
-  errorResponse, 
-  successResponse, 
+const Expense = require("../models/Expense.model");
+const Budget = require("../models/Budget.model");
+const {
+  errorResponse,
+  successResponse,
+  normalizeMoneyAmount,
   isValidDate,
   groupExpensesByDate,
   groupExpensesByCategory,
   getCurrentMonthRange,
-  getMonthRange
-} = require('../utils/helpers');
+  getMonthRange,
+} = require("../utils/helpers");
 
 // @desc    Add new expense
 // @route   POST /api/expenses
@@ -16,27 +17,32 @@ const {
 exports.addExpense = async (req, res) => {
   try {
     const { amount, category, description, date } = req.body;
+    const normalizedAmount = normalizeMoneyAmount(amount);
 
     // Validation
-    if (!amount || !category || !date) {
-      return errorResponse(res, 400, 'Please provide amount, category, and date');
+    if (!normalizedAmount || !category || !date) {
+      return errorResponse(
+        res,
+        400,
+        "Please provide amount, category, and date",
+      );
     }
 
-    if (amount <= 0) {
-      return errorResponse(res, 400, 'Amount must be greater than 0');
+    if (normalizedAmount <= 0) {
+      return errorResponse(res, 400, "Amount must be greater than 0");
     }
 
     if (!isValidDate(date)) {
-      return errorResponse(res, 400, 'Date cannot be in the future');
+      return errorResponse(res, 400, "Date cannot be in the future");
     }
 
     // Create expense
     const expense = await Expense.create({
       user: req.user.id,
-      amount,
+      amount: normalizedAmount,
       category,
       description,
-      date
+      date,
     });
 
     // Update budget spent amount
@@ -44,31 +50,33 @@ exports.addExpense = async (req, res) => {
     const month = expenseDate.getMonth() + 1;
     const year = expenseDate.getFullYear();
 
-    const budget = await Budget.findOne({ 
-      user: req.user.id, 
-      month, 
-      year 
+    const budget = await Budget.findOne({
+      user: req.user.id,
+      month,
+      year,
     });
 
     if (budget) {
-      budget.spent += amount;
-      
+      budget.spent += normalizedAmount;
+
       // Update category budget if exists
-      const categoryBudget = budget.categoryBudgets.find(cb => cb.category === category);
+      const categoryBudget = budget.categoryBudgets.find(
+        (cb) => cb.category === category,
+      );
       if (categoryBudget) {
-        categoryBudget.spent += amount;
+        categoryBudget.spent += normalizedAmount;
       }
-      
+
       await budget.save();
     }
 
-    successResponse(res, 201, expense, 'Expense added successfully');
+    successResponse(res, 201, expense, "Expense added successfully");
   } catch (error) {
-    console.error('Add expense error:', error);
+    console.error("Add expense error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error adding expense',
-      error: error.message
+      message: "Error adding expense",
+      error: error.message,
     });
   }
 };
@@ -101,7 +109,7 @@ exports.getExpenses = async (req, res) => {
 
     // Search in description
     if (search) {
-      query.description = { $regex: search, $options: 'i' };
+      query.description = { $regex: search, $options: "i" };
     }
 
     const expenses = await Expense.find(query).sort({ date: -1 });
@@ -109,14 +117,14 @@ exports.getExpenses = async (req, res) => {
     res.status(200).json({
       success: true,
       count: expenses.length,
-      data: expenses
+      data: expenses,
     });
   } catch (error) {
-    console.error('Get expenses error:', error);
+    console.error("Get expenses error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching expenses',
-      error: error.message
+      message: "Error fetching expenses",
+      error: error.message,
     });
   }
 };
@@ -129,21 +137,21 @@ exports.getExpenseById = async (req, res) => {
     const expense = await Expense.findById(req.params.id);
 
     if (!expense) {
-      return errorResponse(res, 404, 'Expense not found');
+      return errorResponse(res, 404, "Expense not found");
     }
 
     // Make sure user owns the expense
     if (expense.user.toString() !== req.user.id) {
-      return errorResponse(res, 403, 'Not authorized to access this expense');
+      return errorResponse(res, 403, "Not authorized to access this expense");
     }
 
     successResponse(res, 200, expense);
   } catch (error) {
-    console.error('Get expense error:', error);
+    console.error("Get expense error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching expense',
-      error: error.message
+      message: "Error fetching expense",
+      error: error.message,
     });
   }
 };
@@ -156,34 +164,48 @@ exports.updateExpense = async (req, res) => {
     let expense = await Expense.findById(req.params.id);
 
     if (!expense) {
-      return errorResponse(res, 404, 'Expense not found');
+      return errorResponse(res, 404, "Expense not found");
     }
 
     // Make sure user owns the expense
     if (expense.user.toString() !== req.user.id) {
-      return errorResponse(res, 403, 'Not authorized to update this expense');
+      return errorResponse(res, 403, "Not authorized to update this expense");
     }
 
     const oldAmount = expense.amount;
     const oldDate = expense.date;
     const oldCategory = expense.category;
+    const nextAmount = normalizeMoneyAmount(req.body.amount ?? expense.amount);
 
     // Update expense
     expense = await Expense.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true, runValidators: true }
+      {
+        ...req.body,
+        amount: nextAmount,
+      },
+      { new: true, runValidators: true },
     );
 
     // Update budget if amount or date changed
-    if (oldAmount !== expense.amount || oldDate.getTime() !== expense.date.getTime() || oldCategory !== expense.category) {
+    if (
+      oldAmount !== expense.amount ||
+      oldDate.getTime() !== expense.date.getTime() ||
+      oldCategory !== expense.category
+    ) {
       // Remove old amount from old month budget
       const oldMonth = oldDate.getMonth() + 1;
       const oldYear = oldDate.getFullYear();
-      const oldBudget = await Budget.findOne({ user: req.user.id, month: oldMonth, year: oldYear });
+      const oldBudget = await Budget.findOne({
+        user: req.user.id,
+        month: oldMonth,
+        year: oldYear,
+      });
       if (oldBudget) {
         oldBudget.spent -= oldAmount;
-        const oldCategoryBudget = oldBudget.categoryBudgets.find(cb => cb.category === oldCategory);
+        const oldCategoryBudget = oldBudget.categoryBudgets.find(
+          (cb) => cb.category === oldCategory,
+        );
         if (oldCategoryBudget) {
           oldCategoryBudget.spent -= oldAmount;
         }
@@ -193,24 +215,30 @@ exports.updateExpense = async (req, res) => {
       // Add new amount to new month budget
       const newMonth = expense.date.getMonth() + 1;
       const newYear = expense.date.getFullYear();
-      const newBudget = await Budget.findOne({ user: req.user.id, month: newMonth, year: newYear });
+      const newBudget = await Budget.findOne({
+        user: req.user.id,
+        month: newMonth,
+        year: newYear,
+      });
       if (newBudget) {
-        newBudget.spent += expense.amount;
-        const newCategoryBudget = newBudget.categoryBudgets.find(cb => cb.category === expense.category);
+        newBudget.spent += nextAmount;
+        const newCategoryBudget = newBudget.categoryBudgets.find(
+          (cb) => cb.category === expense.category,
+        );
         if (newCategoryBudget) {
-          newCategoryBudget.spent += expense.amount;
+          newCategoryBudget.spent += nextAmount;
         }
         await newBudget.save();
       }
     }
 
-    successResponse(res, 200, expense, 'Expense updated successfully');
+    successResponse(res, 200, expense, "Expense updated successfully");
   } catch (error) {
-    console.error('Update expense error:', error);
+    console.error("Update expense error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error updating expense',
-      error: error.message
+      message: "Error updating expense",
+      error: error.message,
     });
   }
 };
@@ -223,12 +251,12 @@ exports.deleteExpense = async (req, res) => {
     const expense = await Expense.findById(req.params.id);
 
     if (!expense) {
-      return errorResponse(res, 404, 'Expense not found');
+      return errorResponse(res, 404, "Expense not found");
     }
 
     // Make sure user owns the expense
     if (expense.user.toString() !== req.user.id) {
-      return errorResponse(res, 403, 'Not authorized to delete this expense');
+      return errorResponse(res, 403, "Not authorized to delete this expense");
     }
 
     // Update budget
@@ -237,7 +265,9 @@ exports.deleteExpense = async (req, res) => {
     const budget = await Budget.findOne({ user: req.user.id, month, year });
     if (budget) {
       budget.spent -= expense.amount;
-      const categoryBudget = budget.categoryBudgets.find(cb => cb.category === expense.category);
+      const categoryBudget = budget.categoryBudgets.find(
+        (cb) => cb.category === expense.category,
+      );
       if (categoryBudget) {
         categoryBudget.spent -= expense.amount;
       }
@@ -246,13 +276,13 @@ exports.deleteExpense = async (req, res) => {
 
     await expense.deleteOne();
 
-    successResponse(res, 200, {}, 'Expense deleted successfully');
+    successResponse(res, 200, {}, "Expense deleted successfully");
   } catch (error) {
-    console.error('Delete expense error:', error);
+    console.error("Delete expense error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error deleting expense',
-      error: error.message
+      message: "Error deleting expense",
+      error: error.message,
     });
   }
 };
@@ -273,7 +303,7 @@ exports.getExpensesSummary = async (req, res) => {
 
     const expenses = await Expense.find({
       user: req.user.id,
-      date: { $gte: dateRange.startDate, $lte: dateRange.endDate }
+      date: { $gte: dateRange.startDate, $lte: dateRange.endDate },
     }).sort({ date: -1 });
 
     const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -289,16 +319,16 @@ exports.getExpensesSummary = async (req, res) => {
         byDate,
         period: {
           startDate: dateRange.startDate,
-          endDate: dateRange.endDate
-        }
-      }
+          endDate: dateRange.endDate,
+        },
+      },
     });
   } catch (error) {
-    console.error('Get summary error:', error);
+    console.error("Get summary error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching expenses summary',
-      error: error.message
+      message: "Error fetching expenses summary",
+      error: error.message,
     });
   }
 };

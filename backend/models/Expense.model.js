@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { normalizeMoneyAmount } = require("../utils/helpers");
 
 const expenseSchema = new mongoose.Schema(
   {
@@ -9,6 +10,7 @@ const expenseSchema = new mongoose.Schema(
     },
     amount: {
       type: Number,
+      set: normalizeMoneyAmount,
       required: [true, "Amount is required"],
       min: [0.01, "Amount must be greater than 0"],
     },

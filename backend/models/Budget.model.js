@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { normalizeMoneyAmount } = require("../utils/helpers");
 
 const budgetSchema = new mongoose.Schema(
   {
@@ -9,11 +10,13 @@ const budgetSchema = new mongoose.Schema(
     },
     monthlyBudget: {
       type: Number,
+      set: normalizeMoneyAmount,
       required: [true, "Monthly budget is required"],
       min: [0, "Budget cannot be negative"],
     },
     spent: {
       type: Number,
+      set: normalizeMoneyAmount,
       default: 0,
       min: 0,
     },
@@ -53,11 +56,13 @@ const budgetSchema = new mongoose.Schema(
         },
         allocated: {
           type: Number,
+          set: normalizeMoneyAmount,
           default: 0,
           min: 0,
         },
         spent: {
           type: Number,
+          set: normalizeMoneyAmount,
           default: 0,
           min: 0,
         },

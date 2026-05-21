@@ -48,6 +48,17 @@ exports.calculatePercentage = (value, total) => {
   return Math.round((value / total) * 100);
 };
 
+// Normalize money inputs to whole rupees before storage/calculation.
+exports.normalizeMoneyAmount = (amount) => {
+  const numericAmount = Number(amount);
+
+  if (!Number.isFinite(numericAmount)) {
+    return 0;
+  }
+
+  return Math.round(numericAmount);
+};
+
 // Format currency
 exports.formatCurrency = (amount, currency = "INR") => {
   const symbols = {

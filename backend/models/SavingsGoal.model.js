@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { normalizeMoneyAmount } = require("../utils/helpers");
 
 const savingsGoalSchema = new mongoose.Schema(
   {
@@ -15,11 +16,13 @@ const savingsGoalSchema = new mongoose.Schema(
     },
     targetAmount: {
       type: Number,
+      set: normalizeMoneyAmount,
       required: [true, "Target amount is required"],
       min: [1, "Target amount must be greater than 0"],
     },
     savedAmount: {
       type: Number,
+      set: normalizeMoneyAmount,
       default: 0,
       min: 0,
     },
@@ -53,6 +56,7 @@ const savingsGoalSchema = new mongoose.Schema(
       {
         amount: {
           type: Number,
+          set: normalizeMoneyAmount,
           required: true,
         },
         date: {

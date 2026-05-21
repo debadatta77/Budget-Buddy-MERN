@@ -54,11 +54,16 @@
     }
 
     .hero-stat-chip,
+    .expense-metric-card,
+    .dashboard-mini-grid>div {
+        padding: 12px;
+    }
 
     .hero-stat-chip strong,
     .expense-metric-card strong,
     .summary-strip strong,
-    .goal-card-header strong {
+    .goal-card-header strong,
+    .budget-alert__metric strong {
         white-space: nowrap;
         overflow: visible;
         text-overflow: clip;
@@ -69,34 +74,27 @@
         min-width: 0;
     }
 
-    .expense-metric-card,
-    .dashboard-mini-grid>div {
-        padding: 12px;
-    }
-
     .goal-field--wide {
         grid-column: auto;
     }
 
-    gap: 12px;
-
     .goal-card-header {
         grid-template-columns: 44px minmax(0, 1fr);
         align-items: start;
+        gap: 12px;
+    }
+
+    .goal-card-icon {
+        align-self: start;
+        flex-shrink: 0;
+    }
+
+    .goal-card-header strong {
+        line-height: 1.2;
+        word-break: break-word;
     }
 
     .goal-progress-badge {
-
-        .goal-card-icon {
-            align-self: start;
-            flex-shrink: 0;
-        }
-
-        .goal-card-header strong {
-            line-height: 1.2;
-            word-break: break-word;
-        }
-
         grid-column: 1 / -1;
         justify-self: start;
         margin-top: 4px;
@@ -138,7 +136,9 @@
     }
 
     .main-content {
+        margin-left: 0;
         padding: 68px 14px 20px;
+        max-width: 100vw;
     }
 
     .sidebar {
@@ -210,9 +210,18 @@
         white-space: normal;
         max-width: none;
     }
+
+    .budget-alert {
+        grid-template-columns: 1fr;
+        justify-items: start;
+    }
+
+    .budget-alert__metric {
+        justify-items: start;
+        width: 100%;
+    }
 }
 
-/* Desktop: hide mobile topbar */
 @media (min-width: 769px) {
     .mobile-topbar {
         display: none;

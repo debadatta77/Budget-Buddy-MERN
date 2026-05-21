@@ -71,6 +71,9 @@ export default function DashboardPage() {
     if (!dashboard?.summary) return [];
 
     const summary = dashboard.summary;
+    const isBudgetOverused =
+      Number(summary.remaining || 0) < 0 ||
+      Number(summary.budgetPercentage || 0) > 100;
 
     return [
       {
@@ -88,14 +91,14 @@ export default function DashboardPage() {
       {
         label: "Remaining",
         value: formatCurrency(summary.remaining),
-        icon: "🧩",
-        tone: "emerald",
+        icon: isBudgetOverused ? "⚠️" : "🧩",
+        tone: isBudgetOverused ? "danger" : "emerald",
       },
       {
         label: "Budget used",
         value: `${summary.budgetPercentage || 0}%`,
-        icon: "📊",
-        tone: "violet",
+        icon: isBudgetOverused ? "🚨" : "📊",
+        tone: isBudgetOverused ? "danger" : "violet",
       },
       {
         label: "Savings",
@@ -111,6 +114,14 @@ export default function DashboardPage() {
       },
     ];
   }, [dashboard]);
+
+  const summary = dashboard?.summary;
+  const isBudgetOverused =
+    Number(summary?.remaining || 0) < 0 ||
+    Number(summary?.budgetPercentage || 0) > 100;
+  const overuseAmount = isBudgetOverused
+    ? Math.abs(Number(summary?.remaining || 0))
+    : 0;
 
   const recentExpenses = dashboard?.recentExpenses || [];
   const categories = stats?.categoryExpenses || [];
@@ -178,6 +189,29 @@ export default function DashboardPage() {
         <section className="section auth-error">{error}</section>
       ) : (
         <>
+          {isBudgetOverused ? (
+            <section
+              className="budget-alert budget-alert--danger"
+              role="status"
+              aria-live="polite"
+            >
+              <div className="budget-alert__icon">⚠️</div>
+              <div className="budget-alert__content">
+                <p className="budget-alert__eyebrow">Budget exceeded</p>
+                <h2>You're over the monthly budget</h2>
+                <p>
+                  Expenses have crossed the budget by{" "}
+                  {formatCurrency(overuseAmount)}. Remaining is now negative, so
+                  the budget and used totals are highlighted below.
+                </p>
+              </div>
+              <div className="budget-alert__metric">
+                <span>Over by</span>
+                <strong>{formatCurrency(overuseAmount)}</strong>
+              </div>
+            </section>
+          ) : null}
+
           <div className="stats-grid">
             {summaryCards.map((card) => (
               <article
